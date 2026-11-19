@@ -2,6 +2,7 @@ import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-r
 import { useEffect } from 'react'
 import { installKeyboard } from '~/game/input'
 import { useSettings } from '~/game/settings'
+import { startJazz, stopJazz } from '~/game/sfx'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -9,7 +10,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover' },
-      { title: 'OSCE Gym' },
+      { title: 'Nurse RPG' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -23,6 +24,22 @@ function RootComponent() {
   useEffect(() => {
     installKeyboard()
     useSettings.getState().load()
+    const kick = () => {
+      if (useSettings.getState().sound) startJazz()
+    }
+    const unsub = useSettings.subscribe((state, prev) => {
+      if (state.sound === prev.sound) return
+      if (state.sound) startJazz()
+      else stopJazz()
+    })
+    window.addEventListener('pointerdown', kick)
+    window.addEventListener('keydown', kick)
+    return () => {
+      unsub()
+      window.removeEventListener('pointerdown', kick)
+      window.removeEventListener('keydown', kick)
+      stopJazz()
+    }
   }, [])
   return (
     <html lang="en">

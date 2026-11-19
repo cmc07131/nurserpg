@@ -1,9 +1,9 @@
 import { SAVE_VERSION, timeLimitOf, type Pack, type Session } from './schema'
 
-const LAST_KEY = 'osce-gym:last'
+const LAST_KEY = 'nurserpg:last'
 
 export function sessionKey(packId: string) {
-  return `osce-gym:v${SAVE_VERSION}:${packId}`
+  return `nurserpg:v${SAVE_VERSION}:${packId}`
 }
 
 export function freshSession(pack: Pack): Session {

@@ -1,10 +1,10 @@
 {
   "id": "og-delivery",
   "gym": "og",
-  "title": "Emergency delivery and third stage",
+  "title": "Normal delivery",
   "type": "skills",
   "time": 420,
-  "stem": "ED delivery room. A woman at 39 weeks in her second pregnancy is pushing, with the head crowning. The obstetric team is 15 minutes away. Conduct the delivery and the third stage on the manikin.",
+  "stem": "Birth room. Mrs Lai, 28, is at 39 weeks in her second pregnancy. The pregnancy has been normal. The head is crowning. There are no complications. Conduct the delivery and the third stage.",
   "phases": [
     {
       "title": "Prepare",
@@ -28,13 +28,8 @@
       ]
     }
   ],
-  "review": [
-    {
-      "tag": "differs",
-      "text": "Routine oxytocic. Your notes choose Syntometrine. NICE recommends oxytocin 10 IU IM for the third stage: fewer side effects (vomiting, hypertension). Your point that Syntometrine is contraindicated in pre-eclampsia stands."
-    }
-  ],
-  "notes": "Checked against NICE NG235 (Intrapartum care, 2023, which carries on the CG190 recommendations), NICE QS105 statement 6 (delayed cord clamping) and RCOG guidance.\n\nThe birth (NICE): 'hands on' (guarding the perineum and flexing the head) or 'hands poised' may be used; the station teaches hands on. No routine episiotomy. As the head crowns she pants rather than pushes, so it is born slowly between contractions. Feel for a nuchal cord: slip a loose loop over the head; a tight one, 'somersault' delivery; clamping and cutting before the birth is a last resort. Wait for restitution (the head turns to face a thigh: left occipito-anterior turns to her right). With the next contraction, gentle downward axial traction for the anterior shoulder, then upward for the posterior; never hard or lateral traction (brachial plexus). Onto the mother's abdomen skin to skin, the time of birth noted, dried, the wet towel swapped for a dry one and a hat, breathing, tone and colour checked. Routine suctioning is not recommended.\n\nThird stage (NICE): active management is a uterotonic, deferred clamping and cutting of the cord, and controlled cord traction after signs of separation. Oxytocin 10 IU IM after the birth of the baby and before the cord is clamped and cut (palpate first to exclude a second twin). Do not clamp the cord earlier than 1 minute after the birth unless there is concern about cord integrity or a heart rate below 60/min that is not getting faster (QS105); clamp before 5 minutes to perform controlled cord traction. Signs of separation: a gush of blood, cord lengthening, the fundus rising and becoming firm and globular. Traction with the other hand guarding the uterus above the pubis (prevents inversion); twist the membranes out. Check the placenta and membranes are complete and the cord has three vessels; rub up the fundus; inspect for tears; measure the blood loss (weighing pads, the jug): a visual estimate underestimates it. Prolonged third stage: not completed within 30 minutes with active management, or 60 minutes with physiological management. Your notes' 30 minutes is correct for active management.\n\nYour notes choose Syntometrine for routine use; NICE recommends oxytocin 10 IU IM (fewer side effects: vomiting, hypertension). Syntometrine is contraindicated in pre-eclampsia, as your notes say.\n\nChanged from the earlier version: cord clamping moved from the birth into the third stage, after the oxytocin, as NICE orders it. The bench has no wrong-move buttons (no clamp-and-cut-now, no routine suction, no blood-loss guess): mistakes come from doing a real action badly (pushing through crowning, pulling hard, pulling before separation, cutting outside the clamps).\n\nPerfect script checked against NICE NG235 intrapartum care, an HKCEM-style scheme and a keyword scheme.",
+  "review": [],
+  "notes": "A normal birth with no complication. Hands on: a pad guards the perineum and a palm keeps the head flexed. As the head crowns she pants rather than pushes, so it is born slowly. Feel for a nuchal cord and ease a loose loop over the head. Wait for restitution. With the next contraction, gentle axial traction for the anterior shoulder, then the posterior, never hard. Onto her abdomen skin to skin, note the time, dry the baby, and swap the wet towel for a dry one and a hat.\n\nThird stage, after NICE NG235 and QS105: feel for a second twin, then oxytocin 10 IU intramuscular, then clamp the cord no sooner than 1 minute and before 5 minutes. Wait for separation: a gush of blood, the cord lengthening, the fundus rising. Controlled cord traction with the other hand guarding the uterus. Twist the membranes out. Check the placenta, the membranes and three cord vessels. Rub the fundus, look for tears, and measure the blood loss.",
   "cast": [
     {
       "id": "patient",
@@ -57,7 +52,7 @@
       "confirm": "Ready",
       "opts": [
         {
-          "t": "Call obstetrics and neonatology; one team for mother, one for baby",
+          "t": "Neonatal nurse for the baby; one person stays with Mrs Lai",
           "need": true,
           "mark": "Calls for help and forms two teams"
         },
@@ -126,59 +121,6 @@
             "Checks tone, tears and blood loss"
           ],
           "pose": "third"
-        }
-      ]
-    },
-    {
-      "id": "viva",
-      "kind": "viva",
-      "to": "examiner",
-      "label": "Examiner",
-      "qs": [
-        {
-          "q": "NICE drug for active management of the third stage?",
-          "a": "Oxytocin 10 IU IM",
-          "wrong": [
-            "Syntometrine for all",
-            "Misoprostol 800 microgram",
-            "Carboprost 250 microgram"
-          ]
-        },
-        {
-          "q": "Contraindication to Syntometrine?",
-          "a": "Pre-eclampsia / hypertension",
-          "wrong": [
-            "Asthma requiring inhalers",
-            "Grand multiparity (five or more)",
-            "Gestational diabetes on metformin"
-          ]
-        },
-        {
-          "q": "Signs of placental separation?",
-          "a": "Gush of blood, cord lengthening, uterus rises and becomes globular",
-          "wrong": [
-            "Maternal fever, shivering and a soft, boggy uterus",
-            "Fetal crying followed by cord pulsation stopping",
-            "Contractions stop completely for 10 minutes"
-          ]
-        },
-        {
-          "q": "Prolonged third stage with active management (NICE)?",
-          "a": "Not completed within 30 minutes",
-          "wrong": [
-            "Not completed within 5 minutes",
-            "Not completed within 6 hours",
-            "Not completed within 60 minutes"
-          ]
-        },
-        {
-          "q": "Delayed cord clamping in a well term baby?",
-          "a": "At least 60 seconds",
-          "wrong": [
-            "Immediately",
-            "After 10 minutes",
-            "Only preterm babies"
-          ]
         }
       ]
     }
@@ -259,7 +201,7 @@
   "script": [
     {
       "at": "0:00",
-      "say": "Call obstetrics and neonatology; one team for mother, one for baby. PPE; sterile delivery pack with two clamps and scissors. Warm towels, hat, resuscitaire on."
+      "say": "Neonatal nurse for the baby; one person stays with Mrs Lai. PPE; sterile delivery pack with two clamps and scissors. Warm towels, hat, resuscitaire on."
     },
     {
       "at": "0:20",

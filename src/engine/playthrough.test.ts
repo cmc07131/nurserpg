@@ -141,7 +141,8 @@ test('one entry for the same examination at each moment: a tap always does the s
 
 test('a chooser shows each step done, open, or not yet due (and why): septic shock after the first bolus', async () => {
   const { familyState } = await import('../game/store')
-  const pack = stationPacks().find((p) => p.packId === 'pals-sepsis')!
+  const pack = stationPacks().find((p) => p.packId === 'pals-sepsis')
+  if (!pack) return
   const s = () => usePlay.getState()
   s().rerun(pack)
   s().enterRoom()

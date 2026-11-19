@@ -52,8 +52,12 @@ export function stationHit(path: string, raw: unknown): PackHit {
   }
 }
 
+/** Nurse RPG offers one station. Legacy packs stay on disk so the engine tests still have them. */
+const PLAYABLE = new Set(['og-delivery'])
+
 const catalog: PackInfo[] = [...stationIndex.packs, ...stationIndex.stations]
   .map((st): PackInfo => ({ packId: st.id, title: st.title ?? st.id, stationType: (st.type ?? 'resus') as PackInfo['stationType'], timeLimitSec: st.time ?? 420, gym: st.gym }))
+  .filter((info) => PLAYABLE.has(info.packId))
   .sort((a, b) => a.packId.localeCompare(b.packId))
 
 const byId = new Map(catalog.map((info) => [info.packId, info]))
@@ -71,6 +75,7 @@ const loaded = new Map<string, Promise<PackHit>>()
 
 /** Loads, validates and compiles one station (or legacy pack) the first time it is asked for. */
 export function loadPack(packId: string): Promise<PackHit> {
+  if (!PLAYABLE.has(packId)) return Promise.resolve({ ok: false, packId, error: 'Nurse RPG has one station: normal delivery.' })
   const hit = loaded.get(packId)
   if (hit) return hit
   const stationPath = Object.keys(stationFiles).find((p) => stationIdOf(p)?.id === packId)
@@ -89,7 +94,7 @@ export function loadPack(packId: string): Promise<PackHit> {
 
 /** Every pack that belongs to a gym: listed on the gym in world.json, or a station filed under it. */
 export function packsForGym(gymId: string, listed: string[]): string[] {
-  const ids = new Set(listed)
+  const ids = new Set(listed.filter((id) => byId.has(id)))
   for (const info of catalog) if (info.gym === gymId) ids.add(info.packId)
   return [...ids]
 }

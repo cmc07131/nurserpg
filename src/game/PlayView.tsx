@@ -545,7 +545,7 @@ export function PlayView({ pack: source }: { pack: Pack }) {
           )}
         </div>
         <p className="bezel-label">
-          OSCE GYM <span>·</span> <b>{pack.title.toUpperCase()}</b>
+          NURSE RPG <span>·</span> <b>{pack.title.toUpperCase()}</b>
           {isReviewed(pack.packId) && <span className="reviewed-tag">REVIEWED</span>}
         </p>
       </div>

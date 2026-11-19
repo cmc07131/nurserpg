@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
-import { packInfo } from '~/engine/loadPacks'
-import { readLastPackId } from '~/engine/session'
+import { useRef, useState } from 'react'
+import { ROLES, writeRole, type RoleId } from '~/game/delivery/roles'
 import { useButtons } from '~/game/input'
 import { useSettings } from '~/game/settings'
 import { sfx } from '~/game/sfx'
@@ -12,19 +11,23 @@ export const Route = createFileRoute('/')({
   component: TitlePage,
 })
 
+const CHOICES: RoleId[] = ['doctor', 'midwife', 'nurse']
+
 function TitlePage() {
   const navigate = useNavigate()
-  const [lastId, setLastId] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
   const menu = useRef<HTMLDivElement>(null)
   const sound = useSettings((s) => s.sound)
   const toggleSound = useSettings((s) => s.toggleSound)
-  useEffect(() => setLastId(readLastPackId()), [])
-  const last = lastId ? packInfo(lastId) : undefined
 
   function start() {
     sfx.select()
     setStarted(true)
+  }
+
+  function play(role: RoleId) {
+    writeRole(role)
+    void navigate({ to: '/play/$packId', params: { packId: 'og-delivery' }, search: { role } })
   }
 
   useButtons(5, !started, (btn) => {
@@ -35,17 +38,17 @@ function TitlePage() {
   return (
     <div className="page title-page" onClick={() => !started && start()}>
       <div className="flex flex-1 flex-col items-center justify-center gap-2">
-        <p className="title-sub">HKCEM · IEEM PART 2</p>
+        <p className="title-sub">A NORMAL BIRTH</p>
         <h1 className="title-logo">
-          OSCE
+          NURSE
           <br />
-          GYM
+          RPG
         </h1>
-        <p className="title-sub">GOLD EDITION</p>
+        <p className="title-sub">CHOOSE WHO YOU ARE</p>
         <div className="title-stage">
           <Sprite role="nurse" facing="e" walk />
           <Sprite role="doctor" facing="e" walk scale={4} />
-          <Sprite role="examiner" facing="w" />
+          <Sprite role="nurse" facing="w" walk />
         </div>
       </div>
       {!started ? (
@@ -55,25 +58,19 @@ function TitlePage() {
       ) : (
         <div ref={menu} className="mb-6">
           <Win>
-            {last && (
-              <NavItem testId="continue" onClick={() => void navigate({ to: '/play/$packId', params: { packId: last.packId } })}>
-                CONTINUE
-                <span className="nav-need">{last.title}</span>
+            {CHOICES.map((id) => (
+              <NavItem key={id} testId={`role-${id}`} onClick={() => play(id)}>
+                {ROLES[id].short.toUpperCase()}
+                <span className="nav-need">{ROLES[id].blurb}</span>
               </NavItem>
-            )}
-            <NavItem testId="play-world" onClick={() => void navigate({ to: '/world' })}>
-              PLAY · CMC
-            </NavItem>
-            <NavItem testId="stations" onClick={() => void navigate({ to: '/gym' })}>
-              STATION LIST
-            </NavItem>
+            ))}
             <NavItem testId="title-sound" onClick={toggleSound}>
               SOUND: {sound ? 'ON' : 'OFF'}
             </NavItem>
           </Win>
         </div>
       )}
-      <p className="title-foot">Fan-made revision tool · not affiliated with Nintendo, Game Freak or HKCEM</p>
+      <p className="title-foot">Practice for a normal birth · not medical advice · not affiliated with Nintendo</p>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { loadPack } from '~/engine/loadPacks'
+import { readRole } from '~/game/delivery/roles'
 import { sfx } from '~/game/sfx'
 import { useProgress } from '~/world/progress'
 import { NavItem, Win, useCursor } from '~/game/ui'
@@ -16,7 +17,7 @@ function BadgePage() {
   const hit = Route.useLoaderData()
   const pack = hit.ok ? hit.pack : undefined
   const root = useRef<HTMLDivElement>(null)
-  useCursor(root, { priority: 10, onBack: () => void navigate({ to: '/world' }) })
+  useCursor(root, { priority: 10, onBack: () => void navigate({ to: '/' }) })
   useEffect(() => {
     if (!pack) return
     sfx.fanfare()
@@ -41,11 +42,11 @@ function BadgePage() {
         <p className="menu-note">{pack.badge.flavor}</p>
       </Win>
       <Win>
-        <NavItem testId="back-world" onClick={() => void navigate({ to: '/world' })}>
-          BACK TO THE MAP
+        <NavItem testId="back-world" onClick={() => void navigate({ to: '/play/$packId', params: { packId }, search: { role: readRole() } })}>
+          PLAY AGAIN
         </NavItem>
-        <NavItem testId="back-gyms" onClick={() => void navigate({ to: '/gym' })}>
-          STATION LIST
+        <NavItem testId="back-gyms" onClick={() => void navigate({ to: '/' })}>
+          BACK TO THE TITLE
         </NavItem>
       </Win>
     </div>

@@ -7,7 +7,7 @@ import { coinsFor, type CardStats } from './encounter'
  * Kept in localStorage; if storage is blocked the game still plays, it just forgets on reload.
  */
 
-const KEY = 'osce-gym:progress:v1'
+const KEY = 'nurserpg:progress:v1'
 
 type Saved = {
   coins: number

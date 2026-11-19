@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { packInfo } from '~/engine/loadPacks'
 import { isReviewed } from './reviewed'
 import type { Pos } from '~/engine/schema'
+import { readRole } from '~/game/delivery/roles'
 import { Controller } from '~/game/Controller'
 import { press, useButtons } from '~/game/input'
 import { speedLabel, useSettings } from '~/game/settings'
@@ -153,7 +154,7 @@ export function WorldView() {
                 onClose={() => closeInside(overlay.gym.door)}
                 onPlay={(packId) => {
                   leaveDoor(overlay.gym.door)
-                  void navigate({ to: '/play/$packId', params: { packId } })
+                  void navigate({ to: '/play/$packId', params: { packId }, search: { role: readRole() } })
                 }}
               />
             )}

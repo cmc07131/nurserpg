@@ -4,6 +4,7 @@ import { packCatalog, packInfo } from '~/engine/loadPacks'
 import { WORLD } from '~/world/data'
 import { useProgress } from '~/world/progress'
 import { isReviewed } from '~/world/reviewed'
+import { readRole } from '~/game/delivery/roles'
 import { NavItem, Win, useCursor } from '~/game/ui'
 
 export const Route = createFileRoute('/gym')({
@@ -49,7 +50,7 @@ function GymPage() {
                   key={pack.packId}
                   testId={`gym-${pack.packId}`}
                   tone={done ? 'done' : undefined}
-                  onClick={() => void navigate({ to: '/play/$packId', params: { packId: pack.packId } })}
+                  onClick={() => void navigate({ to: '/play/$packId', params: { packId: pack.packId }, search: { role: readRole() } })}
                 >
                   <span className="station-icon" data-type={pack.stationType}>
                     {type.icon}

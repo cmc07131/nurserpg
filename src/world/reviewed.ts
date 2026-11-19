@@ -3,20 +3,10 @@
  * the station's own screen. Add a station's id here once you have reviewed it.
  */
 export const REVIEWED: ReadonlySet<string> = new Set([
-  // The first three, rebuilt by hand.
+  // Legacy packs still on disk for the engine tests. This copy's station is the normal delivery.
   'io-em-01',
   'cv-em-02',
   'aw-em-01',
-  // Airway and trauma.
-  'atls-crico-teach',
-  'atls-lma',
-  // Resuscitation.
-  'acls-tca',
-  // Examinations and procedures.
-  'md-vertigo',
-  'ot-hare',
-  'pd-supracondylar',
-  'sx-suture',
 ])
 
 export const isReviewed = (id: string) => REVIEWED.has(id)

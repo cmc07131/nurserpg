@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { PatientLang } from '~/engine/lang'
 import type { AvatarId } from './positional/scene3d'
 
-const KEY = 'osce-gym:settings'
+const KEY = 'nurserpg:settings'
 
 /** Practice help: `guided` shows the objective and exactly what to do next; `objectives` only the phase; `off` like the exam. */
 export type Coach = 'guided' | 'objectives' | 'off'
@@ -22,7 +22,7 @@ type Stored = { sound: boolean; labels: boolean; patientLang: PatientLang; coach
  * `coach` is guided by default: the phase, and the next action in the perfect script. `patientModel`: who plays the
  * patient in the 3D benches, realistic by default; `customModelName` names the player's own model kept on this device.
  */
-const defaults: Stored = { sound: false, labels: false, patientLang: 'zh', coach: 'guided', difficulty: 'normal', patientModel: 'realistic', customModelName: null, walkSpeed: 1, animSpeed: 1 }
+const defaults: Stored = { sound: true, labels: false, patientLang: 'zh', coach: 'guided', difficulty: 'normal', patientModel: 'realistic', customModelName: null, walkSpeed: 1, animSpeed: 1 }
 
 function read(): Stored {
   try {
@@ -61,7 +61,7 @@ type SettingsState = Stored & {
 
 const nextSpeed = (x: Speed): Speed => SPEEDS[(SPEEDS.indexOf(x) + 1) % SPEEDS.length]
 
-/** Sound is off until the player turns it on. Loaded on the client only, so SSR renders the defaults. */
+/** Sound is on, so the jazz bed plays after the first click. Loaded on the client only, so SSR renders the defaults. */
 export const useSettings = create<SettingsState>((set, get) => {
   const save = (patch: Partial<Stored>) => {
     const next: Stored = { sound: get().sound, labels: get().labels, patientLang: get().patientLang, coach: get().coach, difficulty: get().difficulty, patientModel: get().patientModel, customModelName: get().customModelName, walkSpeed: get().walkSpeed, animSpeed: get().animSpeed, ...patch }
