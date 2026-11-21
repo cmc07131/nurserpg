@@ -3,10 +3,12 @@
  * Nurse Chiu conducts. The pictures follow that job: look from the foot of the bed, ask at the
  * bedside, dress and open the set, then the birth frame by frame, the thigh injection, the
  * placenta separating on its own, and the trolley leaving.
+ *
+ * Figures are pixel blocks (the same crisp look as the rest of the gym). Hit targets stay on
+ * the anatomy, in the same places, so a tap still lands on the head, the cord, or the thigh.
  */
 import { useRef, useState, type ReactNode } from 'react'
 import { toLocal } from '../bench/kit'
-import { Hand } from '../delivery/art'
 import { CLAMP_PICTURE, MIN_CLAMP_CM, cmAt, type NurseRun } from './model'
 
 const FONT = 'Press Start 2P, monospace'
@@ -15,10 +17,12 @@ const PAPER = '#f4f0e4'
 const SKIN = '#e8b494'
 const SKIN_DARK = '#d89c7c'
 const SKIN_EDGE = '#8a5238'
+const HI = '#f3d0b4'
 const MUCOSA = '#c4626a'
 const MUCOSA_DEEP = '#8a2e3a'
 const SCALP = '#c99a88'
 const HAIR = '#3d2c22'
+const HAIR_DARK = '#2a1c16'
 const DRAPE = '#86aebd'
 const DRAPE_DARK = '#6f98a8'
 const CORD = '#dfe3ec'
@@ -26,7 +30,15 @@ const CORD_STRIPE = '#b4bccf'
 const BLOOD = '#9a1020'
 const MARK = '#1d6b45'
 const BAD = '#9a1020'
-const METAL = '#9aa3ad'
+const METAL = '#8e98a4'
+const METAL_DARK = '#5c6770'
+const GLOVE = '#f0e6c8'
+const GLOVE_DARK = '#d4c8a4'
+const GOWN = '#2a62a8'
+const GOWN_DARK = '#1e4a80'
+const BABY = '#f0b8a8'
+const BABY_SHADE = '#d89888'
+const VERNIX = '#f4f0e0'
 
 function T({ x, y, children, size = 5, fill = INK }: { x: number | string; y: number | string; children: string; size?: number | string; fill?: string }) {
   return (
@@ -38,20 +50,240 @@ function T({ x, y, children, size = 5, fill = INK }: { x: number | string; y: nu
 
 function Stage({ h, children }: { h: number; children: ReactNode }) {
   return (
-    <svg viewBox={`0 0 240 ${h}`} className="io-figure mx-auto mb-2 block w-full max-w-[360px] select-none">
+    <svg viewBox={`0 0 240 ${h}`} className="io-figure pixelated mx-auto mb-2 block w-full max-w-[360px] select-none">
       <rect width="240" height={h} fill={PAPER} />
       {children}
     </svg>
   )
 }
 
-/** A picture you tap. The drawing sits under a clear hit rect, so labels cannot steal the centre. */
-function Hot({ id, x, y, w, h, on, onPress, children }: { id: string; x: number; y: number; w: number; h: number; on: boolean; onPress: () => void; children?: ReactNode }) {
+/** Pixel art. Clicks pass through to the hit shapes drawn after it. */
+function Pix({ children }: { children: ReactNode }) {
+  return (
+    <g shapeRendering="crispEdges" style={{ pointerEvents: 'none' }}>
+      {children}
+    </g>
+  )
+}
+
+function Px({ x, y, w, h, c }: { x: number; y: number; w: number; h: number; c: string }) {
+  return <rect x={x} y={y} width={w} height={h} fill={c} />
+}
+
+/** A block with a 2px rim, so a mass reads as a sprite rather than a flat patch. */
+function Box({ x, y, w, h, c, edge = SKIN_EDGE }: { x: number; y: number; w: number; h: number; c: string; edge?: string }) {
   return (
     <g>
-      {children && <g style={{ pointerEvents: 'none' }}>{children}</g>}
-      <rect data-testid={id} x={x} y={y} width={w} height={h} rx="3" fill="transparent" style={{ cursor: 'pointer' }} onPointerDown={(e) => { e.stopPropagation(); onPress() }} />
-      {on && <circle cx={x + w - 5} cy={y + 5} r="2.4" fill={MARK} style={{ pointerEvents: 'none' }} />}
+      <Px x={x} y={y} w={w} h={h} c={edge} />
+      <Px x={x + 2} y={y + 2} w={Math.max(0, w - 4)} h={Math.max(0, h - 4)} c={c} />
+    </g>
+  )
+}
+
+/** Mrs Lai, facing you. x,y is the top of her hair. About 22 by 24. */
+function PxFace({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <Px x={x + 4} y={y} w={14} h={4} c={HAIR_DARK} />
+      <Px x={x + 2} y={y + 4} w={18} h={4} c={HAIR} />
+      <Px x={x} y={y + 6} w={4} h={10} c={HAIR} />
+      <Px x={x + 18} y={y + 6} w={4} h={10} c={HAIR} />
+      <Px x={x + 4} y={y + 8} w={14} h={14} c={SKIN} />
+      <Px x={x + 4} y={y + 18} w={14} h={4} c={SKIN_DARK} />
+      <Px x={x + 6} y={y + 10} w={4} h={2} c={HAIR} />
+      <Px x={x + 12} y={y + 10} w={4} h={2} c={HAIR} />
+      <Px x={x + 6} y={y + 12} w={3} h={3} c="#1a1410" />
+      <Px x={x + 13} y={y + 12} w={3} h={3} c="#1a1410" />
+      <Px x={x + 6} y={y + 12} w={1} h={1} c="#fff" />
+      <Px x={x + 13} y={y + 12} w={1} h={1} c="#fff" />
+      <Px x={x + 10} y={y + 15} w={2} h={3} c={SKIN_DARK} />
+      <Px x={x + 7} y={y + 19} w={8} h={2} c="#a04858" />
+      <Px x={x + 8} y={y + 20} w={6} h={1} c="#c06070" />
+    </g>
+  )
+}
+
+/**
+ * The back of the crowning head. cx,cy is the middle of the scalp.
+ * Hair cap, wet strands, a smear of vernix. No face: this is the occiput.
+ * Stays inside about 36 by 36 so it fills the head you tap and does not cover the perineum.
+ */
+function PxOcciput({ cx, cy }: { cx: number; cy: number }) {
+  return (
+    <g>
+      <Px x={cx - 8} y={cy - 18} w={16} h={4} c={HAIR_DARK} />
+      <Px x={cx - 12} y={cy - 14} w={24} h={4} c={HAIR} />
+      <Px x={cx - 14} y={cy - 10} w={28} h={4} c={HAIR} />
+      <Px x={cx - 2} y={cy - 16} w={4} h={4} c={HAIR_DARK} />
+      <Px x={cx - 16} y={cy - 6} w={32} h={12} c={SCALP} />
+      <Px x={cx - 14} y={cy + 6} w={28} h={6} c={SKIN_DARK} />
+      <Px x={cx - 10} y={cy + 12} w={20} h={4} c="#b88878" />
+      <Px x={cx - 12} y={cy - 6} w={4} h={4} c={HI} />
+      <Px x={cx - 10} y={cy - 8} w={2} h={14} c={HAIR_DARK} />
+      <Px x={cx - 2} y={cy - 6} w={2} h={16} c="#5a4638" />
+      <Px x={cx + 6} y={cy - 8} w={2} h={12} c={HAIR_DARK} />
+      <Px x={cx + 2} y={cy + 2} w={6} h={2} c={VERNIX} />
+      <Px x={cx - 8} y={cy + 6} w={4} h={2} c={VERNIX} />
+    </g>
+  )
+}
+
+/** A newborn, about 64 by 58. x,y is the top-left. back: you are looking at her skin. */
+/** A newborn lying flexed. Big head, frog legs, arms up by the cheeks. About 64 by 54. */
+function PxNewborn({ x, y, back = false, hat = false }: { x: number; y: number; back?: boolean; hat?: boolean }) {
+  return (
+    <g>
+      <Px x={x + 2} y={y + 34} w={16} h={8} c={BABY_SHADE} />
+      <Px x={x} y={y + 40} w={14} h={8} c={BABY} />
+      <Px x={x + 2} y={y + 46} w={8} h={4} c="#c07868" />
+      <Px x={x + 46} y={y + 34} w={16} h={8} c={BABY_SHADE} />
+      <Px x={x + 50} y={y + 40} w={14} h={8} c={BABY} />
+      <Px x={x + 54} y={y + 46} w={8} h={4} c="#c07868" />
+      <Px x={x + 6} y={y + 22} w={12} h={6} c={BABY} />
+      <Px x={x + 4} y={y + 16} w={8} h={8} c={BABY_SHADE} />
+      <Px x={x + 46} y={y + 22} w={12} h={6} c={BABY} />
+      <Px x={x + 52} y={y + 16} w={8} h={8} c={BABY_SHADE} />
+      <Px x={x + 18} y={y + 22} w={28} h={22} c="#c07868" />
+      <Px x={x + 20} y={y + 24} w={24} h={18} c={BABY} />
+      <Px x={x + 22} y={y + 26} w={8} h={6} c="#f6c8ba" />
+      <Px x={x + 12} y={y + 6} w={40} h={18} c={BABY} />
+      <Px x={x + 16} y={y + 4} w={32} h={6} c={BABY} />
+      <Px x={x + 14} y={y + 10} w={4} h={8} c={HAIR} />
+      <Px x={x + 46} y={y + 10} w={4} h={8} c={HAIR} />
+      {hat ? (
+        <>
+          <Px x={x + 14} y={y} w={36} h={8} c="#e8a8bc" />
+          <Px x={x + 16} y={y + 6} w={32} h={4} c="#f0c8d8" />
+          <Px x={x + 18} y={y + 2} w={10} h={2} c="#f8e0ea" />
+        </>
+      ) : (
+        <>
+          <Px x={x + 18} y={y} w={28} h={4} c={HAIR_DARK} />
+          <Px x={x + 16} y={y + 4} w={32} h={4} c={HAIR} />
+        </>
+      )}
+      {back ? (
+        <>
+          <Px x={x + 30} y={y + 26} w={2} h={12} c={BABY_SHADE} />
+          <Px x={x + 24} y={y + 28} w={16} h={2} c={BABY_SHADE} />
+          <Px x={x + 26} y={y + 34} w={12} h={2} c="#c07868" />
+        </>
+      ) : (
+        <>
+          <Px x={x + 22} y={y + 12} w={4} h={3} c="#1a1410" />
+          <Px x={x + 36} y={y + 12} w={4} h={3} c="#1a1410" />
+          <Px x={x + 22} y={y + 12} w={1} h={1} c="#fff" />
+          <Px x={x + 36} y={y + 12} w={1} h={1} c="#fff" />
+          <Px x={x + 30} y={y + 16} w={4} h={2} c={BABY_SHADE} />
+          <Px x={x + 28} y={y + 19} w={8} h={2} c="#c06070" />
+        </>
+      )}
+    </g>
+  )
+}
+
+/** Fingers point up. x,y is the top of the longest finger. About 26 by 24. */
+function PxGlove({ x, y, flip = false }: { x: number; y: number; flip?: boolean }) {
+  return (
+    <g transform={flip ? `translate(${x + 22} ${y}) scale(-1 1)` : `translate(${x} ${y})`}>
+      <Px x={2} y={0} w={4} h={8} c={GLOVE} />
+      <Px x={7} y={-2} w={4} h={10} c="#f4ecd4" />
+      <Px x={12} y={0} w={4} h={8} c={GLOVE} />
+      <Px x={16} y={2} w={4} h={6} c={GLOVE_DARK} />
+      <Px x={0} y={8} w={22} h={10} c={GLOVE} />
+      <Px x={0} y={8} w={22} h={2} c={GLOVE_DARK} />
+      <Px x={-4} y={10} w={6} h={6} c={GLOVE_DARK} />
+      <Px x={0} y={18} w={22} h={4} c={GOWN} />
+    </g>
+  )
+}
+
+/** You, standing. x,y is the top of your hair. About 40 wide and 78 tall. */
+function PxNurse({ x, y, dressed }: { x: number; y: number; dressed: boolean }) {
+  const cloth = dressed ? GOWN : '#7dba9a'
+  const clothDark = dressed ? GOWN_DARK : '#3d6b58'
+  return (
+    <g>
+      <PxFace x={x + 8} y={y} />
+      {dressed && (
+        <>
+          <Px x={x + 12} y={y + 12} w={16} h={4} c="#9ec4da" />
+          <Px x={x + 14} y={y + 13} w={4} h={2} c="#e8f6ff" />
+          <Px x={x + 22} y={y + 13} w={4} h={2} c="#e8f6ff" />
+        </>
+      )}
+      <Px x={x + 4} y={y + 26} w={32} h={40} c={cloth} />
+      <Px x={x + 4} y={y + 26} w={32} h={4} c={clothDark} />
+      <Px x={x + 6} y={y + 30} w={6} h={16} c={dressed ? '#d8ecff' : clothDark} />
+      <Px x={x - 2} y={y + 30} w={8} h={22} c={dressed ? cloth : SKIN} />
+      <Px x={x + 34} y={y + 30} w={8} h={22} c={dressed ? cloth : SKIN} />
+      <Px x={x - 4} y={y + 48} w={10} h={8} c={dressed ? GLOVE : SKIN} />
+      <Px x={x + 34} y={y + 48} w={10} h={8} c={dressed ? GLOVE : SKIN_DARK} />
+      <Px x={x + 8} y={y + 66} w={10} h={8} c={INK} />
+      <Px x={x + 22} y={y + 66} w={10} h={8} c={INK} />
+    </g>
+  )
+}
+
+function PxClock({ x, y, noted }: { x: number; y: number; noted: boolean }) {
+  return (
+    <g>
+      <Px x={x} y={y} w={32} h={32} c={noted ? MARK : INK} />
+      <Px x={x + 4} y={y + 4} w={24} h={24} c={noted ? '#e5f5df' : '#fff'} />
+      <Px x={x + 14} y={y + 8} w={2} h={10} c={INK} />
+      <Px x={x + 14} y={y + 16} w={8} h={2} c={INK} />
+      <Px x={x + 12} y={y + 14} w={4} h={4} c={INK} />
+    </g>
+  )
+}
+
+function PxBottle({ x, y, cap }: { x: number; y: number; cap: string }) {
+  return (
+    <g>
+      <Px x={x} y={y + 6} w={14} h={22} c={INK} />
+      <Px x={x + 2} y={y + 8} w={10} h={18} c="#f4f4f8" />
+      <Px x={x + 4} y={y + 10} w={2} h={12} c="#fff" />
+      <Px x={x + 2} y={y} w={10} h={8} c={cap} />
+      <Px x={x + 4} y={y + 2} w={6} h={2} c="#fff" />
+    </g>
+  )
+}
+
+/** Horizontal 1 ml syringe. The needle points right. */
+function PxSyringe({ x, y, pushed, bad }: { x: number; y: number; pushed: boolean; bad: boolean }) {
+  return (
+    <g>
+      <Px x={x + 40} y={y + 4} w={10} h={2} c="#b0b8c4" />
+      <Px x={x + 36} y={y + 2} w={4} h={6} c={METAL_DARK} />
+      <Px x={x + 10} y={y} w={26} h={10} c={INK} />
+      <Px x={x + 12} y={y + 2} w={22} h={6} c="#f4f8fc" />
+      <Px x={x + (pushed ? 24 : 14)} y={y + 3} w={pushed ? 8 : 16} h={4} c={bad ? '#f0b0b8' : '#d8e8f8'} />
+      <Px x={x + (pushed ? 18 : 4)} y={y - 2} w={4} h={14} c="#404858" />
+      <Px x={x} y={y + 2} w={6} h={6} c="#404858" />
+    </g>
+  )
+}
+
+function PxForceps({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <Px x={x} y={y} w={2} h={14} c={METAL} />
+      <Px x={x + 4} y={y} w={2} h={14} c={METAL_DARK} />
+      <Px x={x} y={y + 12} w={6} h={2} c={METAL} />
+      <Px x={x - 1} y={y + 14} w={4} h={4} c={METAL_DARK} />
+      <Px x={x + 3} y={y + 14} w={4} h={4} c={METAL} />
+      <Px x={x} y={y + 15} w={2} h={2} c="#e8eef2" />
+      <Px x={x + 4} y={y + 15} w={2} h={2} c="#e8eef2" />
+    </g>
+  )
+}
+
+/** A picture you tap. The drawing sits under a clear hit rect, so labels cannot steal the centre. */
+function Hot({ id, x, y, w, h, on, onPress }: { id: string; x: number; y: number; w: number; h: number; on: boolean; onPress: () => void }) {
+  return (
+    <g>
+      <rect data-testid={id} x={x} y={y} width={w} height={h} fill="transparent" style={{ cursor: 'pointer' }} onPointerDown={(e) => { e.stopPropagation(); onPress() }} />
+      {on && <rect x={x + w - 8} y={y + 2} width={4} height={4} fill={MARK} style={{ pointerEvents: 'none' }} />}
     </g>
   )
 }
@@ -59,63 +291,117 @@ function Hot({ id, x, y, w, h, on, onPress, children }: { id: string; x: number;
 function Dots({ n, i }: { n: number; i: number }) {
   return (
     <g style={{ pointerEvents: 'none' }}>
-      {Array.from({ length: n }, (_, k) => (
-        <circle key={k} cx={120 + (k - (n - 1) / 2) * 12} cy="10" r={k === i ? 3.2 : 2} fill={k < i ? MARK : k === i ? INK : '#c8c0b0'} />
-      ))}
+      {Array.from({ length: n }, (_, k) => {
+        const cx = 120 + (k - (n - 1) / 2) * 12
+        const s = k === i ? 6 : 4
+        return <rect key={k} x={cx - s / 2} y={10 - s / 2} width={s} height={s} fill={k < i ? MARK : k === i ? INK : '#c8c0b0'} />
+      })}
     </g>
   )
-}
-
-function Hair({ cx, cy, r }: { cx: number; cy: number; r: number }) {
-  return <path d={`M${cx - r * 0.9} ${cy - r * 0.1} Q${cx} ${cy - r * 1.15} ${cx + r * 0.9} ${cy - r * 0.1} Q${cx} ${cy - r * 0.2} ${cx - r * 0.9} ${cy - r * 0.1} Z`} fill={HAIR} />
 }
 
 /* ---------------------------------------------------------------- look: one view, four signs */
 
 /**
- * From the foot of the bed, lithotomy, the moment the videos hold on. The head stays between
- * contractions. The hit shapes are the head, the bulge, the anus, and what she says.
+ * From the foot of the bed, lithotomy. The head stays between contractions.
+ * Hit shapes are unchanged: head at 120,78 r=18, perineum at 120,124, anus at 120,156, and her words.
  */
 export function LookPicture({ run, onSign }: { run: NurseRun; onSign: (sign: 'crowning' | 'perineum' | 'anus' | 'push') => void }) {
-  const edge = (on: boolean) => (on ? MARK : SKIN_EDGE)
   return (
-    <svg viewBox="0 0 240 206" className="io-figure mx-auto mb-2 block w-full max-w-[360px] select-none" data-testid="nurse-picture">
-      <rect width="240" height="206" fill={DRAPE} />
+    <svg viewBox="0 0 240 206" className="io-figure pixelated mx-auto mb-2 block w-full max-w-[360px] select-none" data-testid="nurse-picture">
+      <Pix>
+        <Px x={0} y={0} w={240} h={206} c={DRAPE} />
+        <Px x={0} y={0} w={240} h={14} c={DRAPE_DARK} />
+        <Px x={0} y={14} w={12} h={160} c={DRAPE_DARK} />
+        <Px x={228} y={14} w={12} h={160} c={DRAPE_DARK} />
+        <Px x={12} y={16} w={70} h={40} c={SKIN_EDGE} />
+        <Px x={16} y={20} w={58} h={32} c={SKIN_DARK} />
+        <Px x={24} y={24} w={24} h={16} c={SKIN} />
+        <Px x={16} y={48} w={68} h={44} c={SKIN_EDGE} />
+        <Px x={20} y={52} w={56} h={36} c={SKIN} />
+        <Px x={28} y={58} w={18} h={14} c={HI} />
+        <Px x={20} y={84} w={62} h={52} c={SKIN_EDGE} />
+        <Px x={24} y={88} w={50} h={44} c={SKIN_DARK} />
+        <Px x={28} y={128} w={44} h={36} c={SKIN_EDGE} />
+        <Px x={32} y={132} w={34} h={28} c={SKIN} />
+        <Px x={158} y={16} w={70} h={40} c={SKIN_EDGE} />
+        <Px x={166} y={20} w={58} h={32} c={SKIN_DARK} />
+        <Px x={192} y={24} w={24} h={16} c={SKIN} />
+        <Px x={156} y={48} w={68} h={44} c={SKIN_EDGE} />
+        <Px x={164} y={52} w={56} h={36} c={SKIN} />
+        <Px x={194} y={58} w={18} h={14} c={HI} />
+        <Px x={158} y={84} w={62} h={52} c={SKIN_EDGE} />
+        <Px x={166} y={88} w={50} h={44} c={SKIN_DARK} />
+        <Px x={168} y={128} w={44} h={36} c={SKIN_EDGE} />
+        <Px x={174} y={132} w={34} h={28} c={SKIN} />
+        <Px x={84} y={18} w={72} h={28} c={SKIN_EDGE} />
+        <Px x={88} y={22} w={64} h={20} c={SKIN_DARK} />
+        <Px x={100} y={20} w={4} h={8} c={HAIR_DARK} />
+        <Px x={108} y={18} w={6} h={10} c={HAIR} />
+        <Px x={118} y={20} w={6} h={8} c={HAIR_DARK} />
+        <Px x={128} y={22} w={4} h={6} c={HAIR} />
+        <Px x={114} y={60} w={12} h={4} c={HAIR_DARK} />
+        <Px x={106} y={64} w={28} h={4} c={HAIR_DARK} />
+        <Px x={102} y={68} w={36} h={6} c={HAIR} />
+        <Px x={100} y={74} w={40} h={12} c={HAIR} />
+        <Px x={100} y={86} w={40} h={6} c={HAIR_DARK} />
+        <Px x={104} y={92} w={32} h={4} c={SCALP} />
+        <Px x={110} y={96} w={20} h={4} c="#b88878" />
+        <Px x={112} y={70} w={6} h={4} c="#5a4638" />
+        <Px x={108} y={80} w={6} h={4} c={HAIR_DARK} />
+        <Px x={126} y={88} w={8} h={2} c={VERNIX} />
+        <Px x={92} y={78} w={8} h={6} c={MUCOSA} />
+        <Px x={88} y={82} w={12} h={12} c={MUCOSA_DEEP} />
+        <Px x={90} y={92} w={10} h={8} c={MUCOSA} />
+        <Px x={94} y={98} w={8} h={4} c="#e08890" />
+        <Px x={140} y={78} w={8} h={6} c={MUCOSA} />
+        <Px x={140} y={82} w={12} h={12} c={MUCOSA_DEEP} />
+        <Px x={140} y={92} w={10} h={8} c={MUCOSA} />
+        <Px x={138} y={98} w={8} h={4} c="#e08890" />
+        <Px x={108} y={98} w={24} h={6} c={MUCOSA} />
+        <Px x={112} y={102} w={16} h={4} c={MUCOSA_DEEP} />
+        <Px x={100} y={108} w={40} h={4} c={SKIN} />
+        <Px x={88} y={112} w={64} h={6} c="#f3e4dc" />
+        <Px x={84} y={118} w={72} h={8} c="#f6ece6" />
+        <Px x={100} y={120} w={40} h={4} c="#fff6f2" />
+        <Px x={92} y={126} w={56} h={6} c="#f3e4dc" />
+        <Px x={104} y={132} w={32} h={4} c={SKIN} />
+        <Px x={112} y={146} w={16} h={2} c={SKIN_DARK} />
+        <Px x={108} y={148} w={24} h={4} c="#a06858" />
+        <Px x={112} y={150} w={16} h={4} c="#6a4034" />
+        <Px x={114} y={152} w={12} h={4} c="#4a2c24" />
+        <Px x={116} y={156} w={8} h={4} c="#6a4034" />
+        <Px x={118} y={160} w={4} h={3} c="#8a5040" />
+        <Px x={100} y={28} w={40} h={6} c={GOWN} />
+        <Px x={102} y={34} w={36} h={10} c={GLOVE} />
+        <Px x={104} y={42} w={4} h={14} c="#f4ecd4" />
+        <Px x={110} y={42} w={4} h={16} c={GLOVE} />
+        <Px x={116} y={42} w={4} h={16} c="#f4ecd4" />
+        <Px x={122} y={42} w={4} h={12} c={GLOVE} />
+        <Px x={128} y={44} w={6} h={8} c={GLOVE_DARK} />
+        <Px x={152} y={116} w={16} h={10} c="#fbfbf6" />
+        <Px x={154} y={118} w={12} h={2} c="#d0d0c4" />
+        <Px x={166} y={108} w={20} h={8} c={GLOVE} />
+        <Px x={168} y={114} w={3} h={8} c="#f4ecd4" />
+        <Px x={173} y={116} w={3} h={8} c={GLOVE} />
+        <Px x={178} y={114} w={3} h={6} c={GLOVE_DARK} />
+        <Px x={168} y={104} w={14} h={4} c={GOWN} />
+      </Pix>
       <g style={{ pointerEvents: 'none' }}>
-        <path d="M0 22 Q46 40 42 108 Q38 168 16 206 L0 206 Z" fill={DRAPE_DARK} />
-        <path d="M240 22 Q194 40 198 108 Q202 168 224 206 L240 206 Z" fill={DRAPE_DARK} />
-        <ellipse cx="120" cy="104" rx="70" ry="66" fill={SKIN} stroke={SKIN_EDGE} />
-        <ellipse cx="120" cy="44" rx="38" ry="18" fill={SKIN_DARK} />
-        {[-18, -8, 2, 12, 22].map((x) => (
-          <path key={x} d={`M${120 + x} 34 q2 -4 4 0`} stroke="#6a4430" strokeWidth="0.8" fill="none" />
-        ))}
-        <rect width="240" height="16" fill={DRAPE_DARK} />
-        <path d="M120 58 Q92 64 90 86 Q88 108 120 116" fill="none" stroke={SKIN_EDGE} strokeWidth="2" />
-        <path d="M120 58 Q148 64 150 86 Q152 108 120 116" fill="none" stroke={SKIN_EDGE} strokeWidth="2" />
-        <ellipse cx="120" cy="98" rx="22" ry="14" fill={MUCOSA} stroke={MUCOSA_DEEP} />
-        <T x="6" y="12" size="4.4" fill="#f8f8f0">FROM THE FOOT</T>
-        <T x="176" y="200" size="4" fill="#f8f8f0">HER L</T>
-        <T x="8" y="200" size="4" fill="#f8f8f0">HER R</T>
-      </g>
-      <Hand x={120} y={52} angle={180} scale={0.55} />
-      <Hand x={186} y={128} angle={-20} scale={0.7}>
-        <rect x="-16" y="-30" width="28" height="14" rx="2" fill="#fbfbf6" stroke="#b8b8a8" />
-      </Hand>
-      <ellipse data-testid="nurse-sign-perineum" cx="120" cy="124" rx="32" ry="12" fill="#f6ece6" stroke={edge(run.perineum)} strokeWidth={run.perineum ? 2.2 : 1.1} onPointerDown={() => onSign('perineum')} />
-      <ellipse data-testid="nurse-sign-anus" cx="120" cy="156" rx="11" ry="8" fill="#b07a64" stroke={edge(run.anus)} strokeWidth={run.anus ? 2.2 : 1} onPointerDown={() => onSign('anus')} />
-      <g data-testid="nurse-sign-crowning" onPointerDown={() => onSign('crowning')} style={{ cursor: 'pointer' }}>
-        <circle cx="120" cy="78" r="18" fill={SCALP} stroke={SKIN_EDGE} strokeWidth="1.2" />
-        <path d="M104 74 Q120 56 136 74 Q120 68 104 74 Z" fill={HAIR} />
-        <path d="M110 66 q1 5 0 8 M120 62 q1 6 0 10 M130 66 q-1 5 0 8" stroke="#5a463a" strokeWidth="0.8" fill="none" />
-        <path d="M112 84 q4 2 8 0" stroke="#f4f0e0" strokeWidth="1.4" fill="none" />
-      </g>
-      <g style={{ pointerEvents: 'none' }}>
+        <T x="6" y="11" size="4.4" fill="#f8f8f0">FROM THE FOOT</T>
+        <T x="4" y="168" size="4" fill="#f8f8f0">HER R</T>
+        <T x="196" y="168" size="4" fill="#f8f8f0">HER L</T>
         <T x="148" y="70" size="4.2" fill={run.crowning ? MARK : '#203040'}>HEAD STAYS</T>
         <T x="156" y="126" size="4.2" fill={run.perineum ? MARK : '#203040'}>BULGE</T>
         <T x="140" y="160" size="4.2" fill={run.anus ? MARK : '#203040'}>POUTING</T>
       </g>
-      <rect data-testid="nurse-sign-push" x="8" y="174" width="224" height="26" rx="6" fill={run.push ? '#e5f5df' : '#fff'} stroke={run.push ? MARK : INK} strokeWidth="1.2" onPointerDown={() => onSign('push')} />
-      <T x="16" y="186" size="5" fill={run.push ? MARK : INK}>SHE SAYS: I HAVE TO PUSH</T>
+      <ellipse data-testid="nurse-sign-perineum" cx="120" cy="124" rx="32" ry="12" fill="transparent" style={{ cursor: 'pointer' }} onPointerDown={() => onSign('perineum')} />
+      <ellipse data-testid="nurse-sign-anus" cx="120" cy="156" rx="11" ry="8" fill="transparent" style={{ cursor: 'pointer' }} onPointerDown={() => onSign('anus')} />
+      <g data-testid="nurse-sign-crowning" onPointerDown={() => onSign('crowning')} style={{ cursor: 'pointer' }}>
+        <circle cx="120" cy="78" r="18" fill="transparent" />
+      </g>
+      <rect data-testid="nurse-sign-push" x="8" y="174" width="224" height="26" fill={run.push ? '#e5f5df' : '#fff'} stroke={run.push ? MARK : INK} strokeWidth="1.2" onPointerDown={() => onSign('push')} />
+      <T x="16" y="190" size="5" fill={run.push ? MARK : INK}>SHE SAYS: I HAVE TO PUSH</T>
     </svg>
   )
 }
@@ -130,132 +416,138 @@ export function AskScene({ run, onAsk }: { run: NurseRun; onAsk: (key: 'liquorAs
   }
   return (
     <Stage h={196}>
+      <Pix>
+        <Px x={4} y={26} w={232} h={116} c="#c5d6e2" />
+        <Px x={8} y={30} w={224} h={108} c="#d5e2ea" />
+        <Px x={8} y={30} w={224} h={4} c="#f7fbfc" />
+        <Px x={12} y={34} w={60} h={16} c="#f4f1e8" />
+        <Px x={16} y={38} w={48} h={8} c="#fff" />
+        <Px x={40} y={58} w={150} h={36} c={SKIN_EDGE} />
+        <Px x={44} y={62} w={142} h={28} c={SKIN} />
+        <Px x={48} y={66} w={20} h={10} c={HI} />
+        <PxFace x={32} y={46} />
+        <Px x={96} y={52} w={48} h={36} c={SKIN_EDGE} />
+        <Px x={100} y={48} w={40} h={12} c={run.obstetric ? '#e8b8a8' : SKIN_DARK} />
+        <Px x={100} y={56} w={40} h={28} c={run.obstetric ? '#f3d8cc' : SKIN} />
+        <Px x={108} y={60} w={16} h={8} c={HI} />
+        <Px x={118} y={52} w={2} h={24} c={SKIN_DARK} />
+        <Px x={116} y={66} w={6} h={4} c={MUCOSA_DEEP} />
+        <Px x={166} y={64} w={56} h={14} c={SKIN_EDGE} />
+        <Px x={170} y={66} w={48} h={10} c={SKIN} />
+        <Px x={174} y={68} w={12} h={6} c={HI} />
+        <Px x={206} y={54} w={16} h={18} c={SKIN} />
+        <Px x={210} y={50} w={4} h={10} c={SKIN_DARK} />
+        <Px x={216} y={48} w={4} h={12} c={SKIN} />
+        <Px x={220} y={52} w={4} h={8} c={SKIN_DARK} />
+        <Px x={36} y={116} w={52} h={14} c="#9ec8dc" />
+        <Px x={42} y={114} w={36} h={10} c="#d7eef8" />
+        <Px x={50} y={116} w={14} h={4} c="#f4fcff" />
+        <Px x={96} y={120} w={28} h={8} c="#c5e4f4" />
+        <Px x={8} y={148} w={224} h={40} c="#fff" />
+        <Px x={8} y={148} w={224} h={2} c={INK} />
+        <Px x={8} y={186} w={224} h={2} c={INK} />
+        <Px x={8} y={148} w={2} h={40} c={INK} />
+        <Px x={230} y={148} w={2} h={40} c={INK} />
+      </Pix>
       <g style={{ pointerEvents: 'none' }}>
-        <rect x="6" y="28" width="228" height="112" rx="8" fill="#d5e2ea" stroke="#8aa0b0" />
-        <path d="M20 78 Q70 60 130 74 Q190 88 220 70 L226 130 L16 132 Z" fill={SKIN} stroke={SKIN_EDGE} />
         <T x="8" y="16" size="4.4">AT THE BEDSIDE</T>
+        <T x="22" y="92" size="4" fill={run.weeks ? MARK : INK}>WEEKS</T>
+        <T x="100" y="96" size="4" fill={run.obstetric ? MARK : INK}>BELLY</T>
+        <T x="168" y="100" size="4" fill={run.allergy ? MARK : INK}>HER ARM</T>
+        <T x="132" y="128" size="4.4" fill={run.liquorAsk ? MARK : INK}>CLEAR WATERS</T>
+        <T x="16" y="174" size="5">{line}</T>
       </g>
-      <Hot id="nurse-ask-weeks" x={14} y={34} w={58} h={62} on={run.weeks} onPress={() => ask('weeks', '39 weeks. My second.')}>
-        <circle cx="43" cy="62" r="20" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M26 56 Q43 40 60 56 Q43 48 26 56 Z" fill={HAIR} />
-        <path d="M34 64 q4 2 8 0 M46 64 q4 2 8 0" stroke={SKIN_EDGE} fill="none" />
-        <path d="M36 74 q7 3 14 0" stroke="#8a3a3a" fill="none" />
-        <T x="22" y="96" size="4">WEEKS</T>
-      </Hot>
-      <Hot id="nurse-ask-obstetric" x={78} y={40} w={78} h={64} on={run.obstetric} onPress={() => ask('obstetric', 'One baby. No scar. No bleed.')}>
-        <ellipse cx="116" cy="72" rx="32" ry="22" fill={run.obstetric ? '#f3d8cc' : SKIN} stroke={SKIN_EDGE} />
-        <path d="M96 78 q20 -16 40 0" stroke={SKIN_EDGE} fill="none" strokeWidth="1.2" />
-        <T x="92" y="98" size="4">BELLY</T>
-      </Hot>
-      <Hot id="nurse-ask-allergy" x={164} y={36} w={66} h={70} on={run.allergy} onPress={() => ask('allergy', 'No allergies. No medicines.')}>
-        <path d="M176 96 Q170 70 196 48 L210 58 Q186 82 196 100 Z" fill={SKIN} stroke={SKIN_EDGE} />
-        <circle cx="198" cy="52" r="7" fill={SKIN} stroke={SKIN_EDGE} />
-        <T x="168" y="100" size="4">HER ARM</T>
-      </Hot>
-      <Hot id="nurse-ask-liquor" x={16} y={112} w={208} h={28} on={run.liquorAsk} onPress={() => ask('liquorAsk', 'The waters are clear.')}>
-        <ellipse cx="70" cy="126" rx="28" ry="8" fill="#d7eef8" stroke="#7aa4c0" />
-        <ellipse cx="108" cy="128" rx="16" ry="5" fill="#eef8fc" stroke="#9ec0d4" />
-        <T x="132" y="130" size="4.4">CLEAR WATERS</T>
-      </Hot>
-      <rect x="8" y="156" width="224" height="32" rx="6" fill="#fff" stroke={INK} style={{ pointerEvents: 'none' }} />
-      <T x="16" y="176" size="5">{line}</T>
+      <Hot id="nurse-ask-weeks" x={14} y={34} w={58} h={62} on={run.weeks} onPress={() => ask('weeks', '39 weeks. My second.')} />
+      <Hot id="nurse-ask-obstetric" x={78} y={40} w={78} h={64} on={run.obstetric} onPress={() => ask('obstetric', 'One baby. No scar. No bleed.')} />
+      <Hot id="nurse-ask-allergy" x={164} y={36} w={66} h={70} on={run.allergy} onPress={() => ask('allergy', 'No allergies. No medicines.')} />
+      <Hot id="nurse-ask-liquor" x={16} y={112} w={208} h={28} on={run.liquorAsk} onPress={() => ask('liquorAsk', 'The waters are clear.')} />
     </Stage>
   )
 }
 
 /* ---------------------------------------------------------------- prepare: the bay */
 
-function Forceps({ x, y, rot = 0 }: { x: number; y: number; rot?: number }) {
-  return (
-    <g transform={`translate(${x} ${y}) rotate(${rot})`}>
-      <path d="M-2 0 L-2 22 M2 0 L2 22" stroke={METAL} strokeWidth="1.3" />
-      <path d="M-4 -2 L0 4 L4 -2" fill="none" stroke={METAL} strokeWidth="1.2" />
-      <circle cx="-2" cy="26" r="2.4" fill="none" stroke={METAL} strokeWidth="1.1" />
-      <circle cx="2" cy="26" r="2.4" fill="none" stroke={METAL} strokeWidth="1.1" />
-    </g>
-  )
-}
-
 export function PrepareScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'ppe' | 'set' | 'pad' | 'drugOut' | 'bottles' | 'form' | 'explain' | 'consent') => void }) {
   return (
     <Stage h={250}>
-      <g style={{ pointerEvents: 'none' }}>
-        <rect x="82" y="6" width="152" height="132" rx="4" fill="#e6eaee" stroke="#98a2ac" />
-        <T x="88" y="16" size="4" fill="#606878">TROLLEY</T>
-      </g>
-      <Hot id="nurse-ppe" x={6} y={8} w={72} h={108} on={run.ppe} onPress={() => onFlag('ppe')}>
-        <circle cx="42" cy="28" r="12" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M32 24 Q42 16 52 24" fill={HAIR} />
-        {run.ppe ? (
-          <g>
-            <path d="M24 40 H60 L66 108 H18 Z" fill="#2f6fad" stroke="#1d4e80" />
-            <path d="M30 46 h8 M46 46 h8" stroke="#d8ecff" strokeWidth="1.4" />
-            <rect x="32" y="24" width="20" height="7" rx="2" fill="#d7eef8" stroke="#5a7a90" />
-            <circle cx="24" cy="96" r="6" fill="#efe3c8" stroke="#9a8a68" />
-            <circle cx="60" cy="96" r="6" fill="#efe3c8" stroke="#9a8a68" />
-          </g>
-        ) : (
-          <g>
-            <path d="M28 42 H56 L60 100 H24 Z" fill="#d9efe4" stroke="#3d6b58" />
-            <path d="M18 78 q10 6 8 16 M66 78 q-10 6 -8 16" stroke={SKIN} strokeWidth="4" fill="none" />
-            <T x="16" y="112" size="3.6">WASH AND DRESS</T>
-          </g>
-        )}
-      </Hot>
-      <Hot id="nurse-set" x={88} y={22} w={70} h={54} on={run.set} onPress={() => onFlag('set')}>
-        <ellipse cx="122" cy="52" rx="30" ry="16" fill="#d5dde4" stroke="#7d8b98" />
+      <Pix>
+        <Px x={84} y={16} w={150} h={6} c="#98a2ac" />
+        <Px x={86} y={22} w={146} h={108} c="#e6eaee" />
+        <Px x={98} y={130} w={6} h={14} c={METAL_DARK} />
+        <Px x={214} y={130} w={6} h={14} c={METAL_DARK} />
+        <Px x={90} y={142} w={20} h={6} c={INK} />
+        <Px x={206} y={142} w={20} h={6} c={INK} />
+        <PxNurse x={16} y={8} dressed={run.ppe} />
+        <Px x={98} y={40} w={52} h={24} c="#7d8b98" />
+        <Px x={102} y={44} w={44} h={16} c="#d5dde4" />
+        <Px x={106} y={48} w={36} h={8} c="#e8eef2" />
         {run.set ? (
-          <g>
-            <Forceps x={108} y={36} rot={-8} />
-            <Forceps x={122} y={36} rot={6} />
-            <path d="M136 40 l8 16 M144 40 l-6 16" stroke={METAL} strokeWidth="1.2" />
-            <rect x="128" y="44" width="5" height="10" rx="1" fill="#f4f4f8" stroke="#3878b8" />
-            <rect x="136" y="44" width="5" height="10" rx="1" fill="#f4f4f8" stroke="#3878b8" />
-          </g>
+          <>
+            <PxForceps x={104} y={36} />
+            <PxForceps x={116} y={38} />
+            <Px x={128} y={42} w={2} h={10} c={METAL} />
+            <Px x={134} y={42} w={2} h={10} c={METAL_DARK} />
+            <Px x={126} y={50} w={6} h={2} c={METAL} />
+            <Px x={130} y={46} w={4} h={4} c="#e8eef2" />
+            <Px x={138} y={46} w={4} h={4} c="#e8eef2" />
+            <Px x={140} y={48} w={6} h={12} c="#f4f4f8" />
+            <Px x={142} y={50} w={2} h={8} c="#3878b8" />
+            <Px x={148} y={48} w={6} h={12} c="#f4f4f8" />
+            <Px x={150} y={50} w={2} h={8} c="#3878b8" />
+          </>
         ) : (
-          <g>
-            <rect x="100" y="36" width="44" height="22" rx="2" fill="#c5ddd2" stroke="#3d6b58" />
-            <T x="106" y="50" size="4">SET</T>
-          </g>
+          <>
+            <Px x={108} y={46} w={32} h={14} c="#3d6b58" />
+            <Px x={110} y={48} w={28} h={10} c="#c5ddd2" />
+          </>
         )}
-      </Hot>
-      <Hot id="nurse-drug-out" x={164} y={22} w={66} h={54} on={run.drugOut} onPress={() => onFlag('drugOut')}>
-        <path d="M190 30 L196 38 V62 Q193 68 187 62 V38 Z" fill="#f4f0c8" stroke="#a09040" />
-        <rect x="188" y="44" width="8" height="12" fill="#e6c84a" />
-        <T x="168" y="74" size="3.6">{run.drugOut ? '1 ml READY' : '1 ml NOT GIVEN'}</T>
-      </Hot>
-      <Hot id="nurse-pad" x={88} y={80} w={70} h={52} on={run.pad} onPress={() => onFlag('pad')}>
-        <rect x="94" y="88" width="14" height="28" rx="3" fill="#d7eef8" stroke="#3a7ca5" />
-        <rect x="97" y="96" width="8" height="12" fill="#7ec8e8" />
-        <rect x="114" y="96" width="36" height="16" rx="3" fill="#f7f7f2" stroke="#b0b0a4" />
-        <path d="M118 104 h28" stroke="#7eb6e0" strokeWidth="2" />
-        <T x="92" y="128" size="3.6">0.05% AND PAD</T>
-      </Hot>
-      <Hot id="nurse-bottles" x={164} y={80} w={66} h={52} on={run.bottles} onPress={() => onFlag('bottles')}>
-        <rect x="172" y="92" width="16" height="26" rx="2" fill="#f4f4f8" stroke="#6878a0" />
-        <rect x="174" y="88" width="12" height="6" fill="#6a3d8a" />
-        <rect x="196" y="92" width="16" height="26" rx="2" fill="#f4f4f8" stroke="#a86858" />
-        <rect x="198" y="88" width="12" height="6" fill="#b03040" />
-        <T x="170" y="128" size="3.6">EDTA TSH</T>
-      </Hot>
-      <Hot id="nurse-form" x={6} y={122} w={72} h={52} on={run.form} onPress={() => onFlag('form')}>
-        <rect x="16" y="128" width="48" height="36" rx="2" fill="#fff" stroke={INK} />
-        <path d="M22 136 h36 M22 144 h28 M22 152 h32" stroke="#c8c0b0" strokeWidth="1" />
-        <T x="22" y="160" size="4">BBA</T>
-      </Hot>
-      <Hot id="nurse-explain" x={84} y={142} w={148} h={48} on={run.explain} onPress={() => onFlag('explain')}>
-        <circle cx="108" cy="166" r="14" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M96 160 Q108 148 120 160" fill={HAIR} />
-        <path d="M126 170 h40" stroke={SKIN} strokeWidth="6" strokeLinecap="round" />
-        <circle cx="168" cy="170" r="6" fill="#efe3c8" stroke="#9a8a68" />
-        <T x="176" y="166" size="3.8">I AM STAYING</T>
-      </Hot>
-      <Hot id="nurse-consent" x={8} y={198} w={224} h={44} on={run.consent} onPress={() => onFlag('consent')}>
-        <path d="M28 214 l10 14 M40 214 l-6 14" stroke={METAL} strokeWidth="1.4" />
-        <circle cx="34" cy="232" r="3" fill="none" stroke={METAL} />
+        <Px x={186} y={28} w={8} h={4} c="#c8ccd0" />
+        <Px x={184} y={32} w={16} h={26} c="#f4f0c8" />
+        <Px x={186} y={42} w={12} h={8} c="#e6c84a" />
+        <Px x={190} y={34} w={2} h={16} c="#fff8dc" />
+        <Px x={96} y={86} w={12} h={26} c="#3a7ca5" />
+        <Px x={98} y={88} w={8} h={20} c="#d7eef8" />
+        <Px x={100} y={96} w={4} h={8} c="#7ec8e8" />
+        <Px x={112} y={96} w={36} h={16} c="#f7f7f2" />
+        <Px x={116} y={102} w={28} h={3} c="#7eb6e0" />
+        <PxBottle x={174} y={84} cap="#6a3d8a" />
+        <PxBottle x={196} y={84} cap="#b03040" />
+        <Px x={18} y={128} w={44} h={36} c={INK} />
+        <Px x={20} y={130} w={40} h={32} c="#fff" />
+        <Px x={24} y={136} w={32} h={2} c="#c8c0b0" />
+        <Px x={24} y={142} w={24} h={2} c="#c8c0b0" />
+        <Px x={24} y={148} w={28} h={2} c="#c8c0b0" />
+        <PxFace x={96} y={150} />
+        <Px x={120} y={168} w={28} h={8} c={SKIN} />
+        <Px x={146} y={164} w={16} h={12} c={GLOVE} />
+        <Px x={148} y={160} w={4} h={6} c="#f4ecd4" />
+        <Px x={154} y={162} w={4} h={6} c={GLOVE} />
+        <Px x={28} y={208} w={2} h={12} c={METAL} />
+        <Px x={34} y={208} w={2} h={12} c={METAL_DARK} />
+        <Px x={26} y={218} w={6} h={2} c={METAL} />
+        <Px x={24} y={214} w={4} h={4} c="#e8eef2" />
+        <Px x={34} y={214} w={4} h={4} c="#e8eef2" />
+      </Pix>
+      <g style={{ pointerEvents: 'none' }}>
+        <T x="88" y="16" size="4" fill="#606878">TROLLEY</T>
+        {!run.ppe && <T x="10" y="112" size="3.6">WASH AND DRESS</T>}
+        {!run.set && <T x="112" y="56" size="4">SET</T>}
+        <T x="168" y="70" size="3.6">{run.drugOut ? '1 ml READY' : '1 ml NOT GIVEN'}</T>
+        <T x="92" y="124" size="3.6">0.05% AND PAD</T>
+        <T x="174" y="124" size="3.6">EDTA TSH</T>
+        <T x="28" y="156" size="4">BBA</T>
+        <T x="168" y="166" size="3.8">I AM STAYING</T>
         <T x="52" y="216" size="4.2">IF A CUT IS NEEDED</T>
         <T x="52" y="230" size="4" fill="#606878">YOU DO NOT DECIDE</T>
-      </Hot>
+      </g>
+      <Hot id="nurse-ppe" x={6} y={8} w={72} h={108} on={run.ppe} onPress={() => onFlag('ppe')} />
+      <Hot id="nurse-set" x={88} y={22} w={70} h={54} on={run.set} onPress={() => onFlag('set')} />
+      <Hot id="nurse-drug-out" x={164} y={22} w={66} h={54} on={run.drugOut} onPress={() => onFlag('drugOut')} />
+      <Hot id="nurse-pad" x={88} y={80} w={70} h={52} on={run.pad} onPress={() => onFlag('pad')} />
+      <Hot id="nurse-bottles" x={164} y={80} w={66} h={52} on={run.bottles} onPress={() => onFlag('bottles')} />
+      <Hot id="nurse-form" x={6} y={122} w={72} h={52} on={run.form} onPress={() => onFlag('form')} />
+      <Hot id="nurse-explain" x={84} y={142} w={148} h={48} on={run.explain} onPress={() => onFlag('explain')} />
+      <Hot id="nurse-consent" x={8} y={198} w={224} h={44} on={run.consent} onPress={() => onFlag('consent')} />
     </Stage>
   )
 }
@@ -271,17 +563,6 @@ function birthStep(run: NurseRun) {
   return 5
 }
 
-function Clock({ noted }: { noted: boolean }) {
-  return (
-    <g>
-      <circle cx="36" cy="78" r="26" fill={noted ? '#e5f5df' : '#fff'} stroke={noted ? MARK : INK} strokeWidth="1.6" />
-      <path d="M36 78 L36 60" stroke={INK} strokeWidth="1.4" />
-      <path d="M36 78 L48 84" stroke={INK} strokeWidth="1.2" />
-      <circle cx="36" cy="78" r="1.6" fill={INK} />
-    </g>
-  )
-}
-
 export function BirthScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'time' | 'cord' | 'liquor' | 'shown' | 'birthmark') => void }) {
   const step = birthStep(run)
   return (
@@ -289,100 +570,131 @@ export function BirthScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'time
       <Dots n={6} i={step} />
       {step === 0 && (
         <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c="#e7eef2" />
+            <Px x={0} y={18} w={240} h={8} c={DRAPE_DARK} />
+            <PxClock x={18} y={56} noted={false} />
+            <Px x={120} y={70} w={28} h={40} c={SKIN_EDGE} />
+            <Px x={124} y={74} w={20} h={32} c={SKIN} />
+            <Px x={156} y={70} w={28} h={40} c={SKIN_EDGE} />
+            <Px x={160} y={74} w={20} h={32} c={SKIN} />
+            <PxOcciput cx={162} cy={96} />
+            <Px x={148} y={108} w={28} h={8} c={MUCOSA} />
+            <PxGlove x={128} y={78} />
+            <PxGlove x={176} y={100} flip />
+          </Pix>
           <g style={{ pointerEvents: 'none' }}>
-            <rect y="18" width="240" height="158" fill="#e7eef2" />
-            <T x="78" y="28" size="4.4">NURSE CHIU DELIVERS</T>
-            <ellipse cx="150" cy="100" rx="46" ry="36" fill={SKIN} stroke={SKIN_EDGE} />
-            <circle cx="150" cy="78" r="16" fill={SCALP} stroke={SKIN_EDGE} />
-            <Hair cx={150} cy={74} r={15} />
-            <path d="M150 96 q20 20 10 36" stroke={CORD} strokeWidth="5" fill="none" />
+            <T x="78" y="32" size="4.4">NURSE CHIU DELIVERS</T>
+            <T x="14" y="108" size="4">CALL TIME</T>
           </g>
-          <Hand x={118} y={88} angle={40} scale={0.8} />
-          <Hand x={186} y={112} angle={-50} scale={0.8} />
-          <Hot id="nurse-time" x={8} y={48} w={56} h={64} on={false} onPress={() => onFlag('time')}>
-            <Clock noted={false} />
-            <T x="16" y="118" size="4">CALL TIME</T>
-          </Hot>
+          <Hot id="nurse-time" x={8} y={48} w={56} h={64} on={false} onPress={() => onFlag('time')} />
         </>
       )}
       {step === 1 && (
         <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c="#f6efe8" />
+            <Px x={108} y={30} w={24} h={4} c={HAIR_DARK} />
+            <Px x={100} y={34} w={40} h={6} c={HAIR} />
+            <Px x={96} y={40} w={48} h={8} c={SCALP} />
+            <Px x={94} y={48} w={52} h={10} c={SCALP} />
+            <Px x={100} y={44} w={8} h={4} c={HI} />
+            <Px x={98} y={58} w={44} h={6} c={SKIN_DARK} />
+            <Px x={108} y={64} w={24} h={14} c={SKIN} />
+            <Px x={112} y={68} w={16} h={6} c={SKIN_DARK} />
+            <Px x={80} y={76} w={80} h={8} c={SKIN_EDGE} />
+            <Px x={64} y={84} w={112} h={10} c={SKIN} />
+            <Px x={52} y={94} w={136} h={44} c={SKIN_EDGE} />
+            <Px x={56} y={98} w={128} h={36} c={SKIN} />
+            <Px x={64} y={102} w={16} h={10} c={HI} />
+            <Px x={112} y={108} w={10} h={10} c={MUCOSA} />
+            <Px x={114} y={110} w={6} h={6} c={MUCOSA_DEEP} />
+            <Px x={120} y={112} w={72} h={10} c={CORD} />
+            {Array.from({ length: 12 }, (_, i) => (
+              <Px key={i} x={120 + i * 6} y={112} w={2} h={10} c={CORD_STRIPE} />
+            ))}
+          </Pix>
           <g style={{ pointerEvents: 'none' }}>
-            <rect y="18" width="240" height="158" fill="#f6efe8" />
-            <T x="78" y="28" size="4.4">LOOK AT THE NECK</T>
-            <circle cx="120" cy="70" r="28" fill={SCALP} stroke={SKIN_EDGE} />
-            <Hair cx={120} cy={62} r={26} />
-            <path d="M78 108 Q120 96 162 108 L170 150 L70 150 Z" fill={SKIN} stroke={SKIN_EDGE} />
-            <path d="M120 112 Q150 140 168 168" stroke={CORD} strokeWidth="7" fill="none" />
-            <path d="M120 112 Q150 140 168 168" stroke={CORD_STRIPE} strokeWidth="7" strokeDasharray="2 4" fill="none" />
+            <T x="70" y="28" size="4.4">LOOK AT THE NECK</T>
             <T x="16" y="164" size="4">CORD IS ON THE CHEST</T>
           </g>
-          <Hot id="nurse-cord" x={88} y={96} w={64} h={36} on={false} onPress={() => onFlag('cord')}>
-            <ellipse cx="120" cy="114" rx="22" ry="12" fill={SKIN_DARK} stroke={SKIN_EDGE} />
-          </Hot>
+          <Hot id="nurse-cord" x={88} y={96} w={64} h={36} on={false} onPress={() => onFlag('cord')} />
         </>
       )}
       {step === 2 && (
         <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c={DRAPE} />
+            <Px x={28} y={48} w={40} h={70} c={SKIN_EDGE} />
+            <Px x={32} y={52} w={32} h={62} c={SKIN} />
+            <Px x={172} y={48} w={40} h={70} c={SKIN_EDGE} />
+            <Px x={176} y={52} w={32} h={62} c={SKIN} />
+            <Px x={96} y={56} w={48} h={28} c={MUCOSA_DEEP} />
+            <Px x={100} y={60} w={40} h={20} c={MUCOSA} />
+            <Px x={112} y={66} w={16} h={8} c="#e08890" />
+            <Px x={68} y={112} w={104} h={32} c="#d8d8cc" />
+            <Px x={72} y={116} w={96} h={24} c="#f7f7f2" />
+            <Px x={84} y={126} w={64} h={14} c="#d5eef8" />
+            <Px x={96} y={128} w={24} h={4} c="#f4fcff" />
+            <Px x={80} y={132} w={12} h={4} c="#c5e4f4" />
+          </Pix>
           <g style={{ pointerEvents: 'none' }}>
-            <rect y="18" width="240" height="158" fill={DRAPE} />
-            <ellipse cx="120" cy="96" rx="64" ry="50" fill={SKIN} stroke={SKIN_EDGE} />
-            <ellipse cx="120" cy="90" rx="16" ry="18" fill={MUCOSA} stroke={MUCOSA_DEEP} />
-            <rect x="70" y="118" width="100" height="28" rx="3" fill="#f7f7f2" stroke="#b0b0a4" />
-            <T x="70" y="28" size="4.4" fill="#f8f8f0">LIQUOR ON THE PAD</T>
+            <T x="62" y="32" size="4.4" fill="#f8f8f0">LIQUOR ON THE PAD</T>
           </g>
-          <Hot id="nurse-liquor" x={78} y={120} w={84} h={28} on={false} onPress={() => onFlag('liquor')}>
-            <ellipse cx="120" cy="134" rx="30" ry="8" fill="#d5eef8" stroke="#6a98b8" />
-          </Hot>
+          <Hot id="nurse-liquor" x={78} y={120} w={84} h={28} on={false} onPress={() => onFlag('liquor')} />
         </>
       )}
       {step === 3 && (
         <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c="#d8e4ea" />
+            <Px x={8} y={48} w={224} h={120} c={SKIN_EDGE} />
+            <Px x={12} y={52} w={216} h={112} c={SKIN} />
+            <Px x={20} y={60} w={28} h={16} c={HI} />
+            <PxFace x={186} y={22} />
+            <PxNewborn x={88} y={64} />
+            <PxGlove x={58} y={70} />
+            <PxGlove x={160} y={72} flip />
+          </Pix>
           <g style={{ pointerEvents: 'none' }}>
-            <rect y="18" width="240" height="158" fill="#d8e4ea" />
-            <path d="M16 20 H224 L230 168 H10 Z" fill={SKIN} stroke={SKIN_EDGE} />
-            <circle cx="120" cy="42" r="12" fill={SKIN} stroke={SKIN_EDGE} />
-            <path d="M112 40 q4 2 8 0 M116 46 q4 2 8 0" stroke={SKIN_EDGE} fill="none" />
             <T x="8" y="32" size="4">SHOW HER THE BABY</T>
           </g>
-          <Hot id="nurse-show" x={70} y={58} w={100} h={90} on={false} onPress={() => onFlag('shown')}>
-            <ellipse cx="92" cy="110" rx="10" ry="18" fill="#e8a898" transform="rotate(-25 92 110)" />
-            <ellipse cx="148" cy="110" rx="10" ry="18" fill="#e8a898" transform="rotate(25 148 110)" />
-            <ellipse cx="120" cy="108" rx="28" ry="32" fill="#e8a898" stroke={SKIN_EDGE} />
-            <circle cx="120" cy="74" r="16" fill="#e8a898" stroke={SKIN_EDGE} />
-            <path d="M112 78 q4 2 8 0" stroke="#5a3428" fill="none" />
-          </Hot>
-          <Hand x={78} y={100} angle={70} scale={0.7} />
-          <Hand x={168} y={108} angle={-70} scale={0.7} />
+          <Hot id="nurse-show" x={70} y={58} w={100} h={90} on={false} onPress={() => onFlag('shown')} />
         </>
       )}
       {step === 4 && (
         <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c="#f6efe8" />
+            <Px x={40} y={48} w={160} h={100} c="#f3e6dc" />
+            <PxNewborn x={88} y={52} back />
+          </Pix>
           <g style={{ pointerEvents: 'none' }}>
-            <rect y="18" width="240" height="158" fill="#f6efe8" />
-            <T x="62" y="28" size="4.4">LOOK OVER HER SKIN</T>
+            <T x="62" y="32" size="4.4">LOOK OVER HER SKIN</T>
           </g>
-          <Hot id="nurse-look" x={48} y={40} w={144} h={110} on={false} onPress={() => onFlag('birthmark')}>
-            <ellipse cx="120" cy="108" rx="40" ry="28" fill="#e8a898" stroke={SKIN_EDGE} />
-            <circle cx="120" cy="62" r="20" fill="#e8a898" stroke={SKIN_EDGE} />
-            <path d="M100 100 q20 8 40 0 M104 116 q16 6 32 0" stroke="#d09080" fill="none" />
-          </Hot>
+          <Hot id="nurse-look" x={48} y={40} w={144} h={110} on={false} onPress={() => onFlag('birthmark')} />
         </>
       )}
       {step === 5 && (
-        <g style={{ pointerEvents: 'none' }}>
-          <rect y="18" width="240" height="158" fill="#d8e4ea" />
-          <path d="M10 16 H230 L236 168 H4 Z" fill={SKIN} stroke={SKIN_EDGE} />
-          <ellipse cx="78" cy="118" rx="9" ry="16" fill="#e8a898" transform="rotate(-28 78 118)" />
-          <ellipse cx="162" cy="118" rx="9" ry="16" fill="#e8a898" transform="rotate(28 162 118)" />
-          <ellipse cx="86" cy="78" rx="7" ry="14" fill="#e8a898" transform="rotate(40 86 78)" />
-          <ellipse cx="154" cy="78" rx="7" ry="14" fill="#e8a898" transform="rotate(-40 154 78)" />
-          <ellipse cx="120" cy="104" rx="26" ry="32" fill="#e8a898" stroke={SKIN_EDGE} />
-          <circle cx="120" cy="64" r="14" fill="#e8a898" stroke={SKIN_EDGE} />
-          <path d="M110 66 q5 2 10 0" stroke="#5a3428" fill="none" />
-          <path d="M108 52 Q120 44 132 52 Q120 48 108 52 Z" fill="#f0c8d8" stroke="#a87890" />
-          <T x="16" y="156" size="4.4" fill={MARK}>A GIRL · NO CORD · CLEAR · NO MARK</T>
-        </g>
+        <>
+          <Pix>
+            <Px x={0} y={18} w={240} h={158} c="#d8e4ea" />
+            <Px x={4} y={36} w={232} h={132} c={SKIN_EDGE} />
+            <Px x={8} y={40} w={224} h={124} c={SKIN} />
+            <Px x={16} y={48} w={36} h={20} c={HI} />
+            <PxFace x={12} y={44} />
+            <Px x={48} y={96} w={36} h={12} c={SKIN_DARK} />
+            <Px x={56} y={88} w={28} h={12} c={SKIN} />
+            <Px x={156} y={96} w={36} h={12} c={SKIN_DARK} />
+            <Px x={156} y={88} w={28} h={12} c={SKIN} />
+            <Px x={16} y={140} w={36} h={14} c="#f0c8d8" />
+            <Px x={188} y={140} w={36} h={14} c="#f0c8d8" />
+            <PxNewborn x={88} y={62} hat />
+          </Pix>
+          <g style={{ pointerEvents: 'none' }}>
+            <T x="16" y="156" size="4.4" fill={MARK}>A GIRL · NO CORD · CLEAR · NO MARK</T>
+          </g>
+        </>
       )}
     </Stage>
   )
@@ -392,19 +704,23 @@ export function BirthScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'time
 
 function CordClamp({ x, y, bad }: { x: number; y: number; bad?: boolean }) {
   return (
-    <g transform={`translate(${x} ${y})`} style={{ pointerEvents: 'none' }}>
-      <rect x="-4" y="-16" width="8" height="32" rx="1.5" fill={bad ? '#f8d0d4' : '#f4f4f8'} stroke={bad ? BAD : '#3878b8'} strokeWidth="1.3" />
-      <rect x="-1.3" y="-7" width="2.6" height="14" fill={bad ? BAD : '#3878b8'} />
+    <g style={{ pointerEvents: 'none' }}>
+      <Px x={x - 5} y={y - 16} w={10} h={32} c={bad ? BAD : '#3878b8'} />
+      <Px x={x - 3} y={y - 14} w={6} h={28} c={bad ? '#f8d0d4' : '#f4f4f8'} />
+      <Px x={x - 1} y={y - 8} w={2} h={16} c={bad ? BAD : '#3878b8'} />
     </g>
   )
 }
 
 function CordRun({ x1, x2, y }: { x1: number; x2: number; y: number }) {
   if (x2 - x1 < 2) return null
+  const w = x2 - x1
   return (
     <g style={{ pointerEvents: 'none' }}>
-      <line x1={x1} x2={x2} y1={y} y2={y} stroke={CORD} strokeWidth="12" strokeLinecap="butt" />
-      <line x1={x1} x2={x2} y1={y} y2={y} stroke={CORD_STRIPE} strokeWidth="12" strokeDasharray="2.4 4" />
+      <Px x={x1} y={y - 6} w={w} h={12} c={CORD} />
+      {Array.from({ length: Math.floor(w / 6) }, (_, i) => (
+        <Px key={i} x={x1 + i * 6} y={y - 6} w={2} h={12} c={CORD_STRIPE} />
+      ))}
     </g>
   )
 }
@@ -418,12 +734,13 @@ export function ClampPicture({ run, onPick }: { run: NurseRun; onPick: (cm: numb
   const close = placed !== null && placed < MIN_CLAMP_CM
   const secondCm = placed === null ? null : Math.min(placed + 1.6, (p.w - 18 - p.umbilicusX) / p.pxPerCm)
   const cut = placed !== null && !close && secondCm !== null && secondCm - placed >= 1.2
+  const mid = cut && secondCm !== null && placed !== null ? (xAt(placed) + xAt(secondCm)) / 2 : 0
   return (
     <div className="mx-auto mb-2 max-w-[360px]" style={{ touchAction: 'none' }}>
       <svg
         ref={svg}
         viewBox={`0 0 ${p.w} ${p.h}`}
-        className="io-figure block h-auto w-full select-none"
+        className="io-figure pixelated block h-auto w-full select-none"
         data-testid="nurse-clamp-picture"
         onPointerDown={(e) => {
           const pt = toLocal(svg.current, e)
@@ -434,44 +751,56 @@ export function ClampPicture({ run, onPick }: { run: NurseRun; onPick: (cm: numb
         }}
       >
         <rect width={p.w} height={p.h} fill="#e6eef2" />
-        <ellipse cx="24" cy={p.cordY} rx="22" ry="28" fill="#e8a898" stroke={SKIN_EDGE} style={{ pointerEvents: 'none' }} />
-        <circle cx={p.umbilicusX} cy={p.cordY} r="4.5" fill={MUCOSA} stroke={SKIN_EDGE} style={{ pointerEvents: 'none' }} />
-        <path d={`M${p.w} 36 Q${p.w - 28} 48 ${p.w - 24} ${p.cordY} Q${p.w - 28} 78 ${p.w} 88`} fill={MUCOSA} stroke={MUCOSA_DEEP} style={{ pointerEvents: 'none' }} />
-        <T x="4" y="14" size="4.2">BABY</T>
-        <T x="196" y="14" size="4.2">MOTHER</T>
-        {placed === null || !cut ? (
-          <CordRun x1={p.umbilicusX} x2={p.w - 16} y={p.cordY} />
-        ) : (
-          <>
-            <CordRun x1={p.umbilicusX} x2={xAt(placed) - 7} y={p.cordY} />
-            <CordRun x1={xAt(secondCm!) + 7} x2={p.w - 16} y={p.cordY} />
-          </>
-        )}
-        {[1, 2, 3, 4, 5].map((cm) => (
-          <g key={cm} style={{ pointerEvents: 'none' }}>
-            <line x1={xAt(cm)} x2={xAt(cm)} y1={p.cordY + 14} y2={p.cordY + 20} stroke={INK} strokeWidth="1" />
-            <T x={xAt(cm) - 3} y={p.cordY + 30} size="4.4">{String(cm)}</T>
-          </g>
-        ))}
-        <g style={{ pointerEvents: 'none' }}>
-          <line x1={xAt(MIN_CLAMP_CM)} x2={xAt(MIN_CLAMP_CM)} y1={p.cordY - 22} y2={p.cordY + 20} stroke={MARK} strokeWidth="1.2" strokeDasharray="2 2" />
-          <T x={xAt(MIN_CLAMP_CM) - 14} y={p.cordY - 26} size="4" fill={MARK}>2.5 cm</T>
-        </g>
+        <Pix>
+          <Px x={2} y={34} w={40} h={52} c="#c07868" />
+          <Px x={6} y={38} w={32} h={44} c={BABY} />
+          <Px x={10} y={30} w={20} h={10} c={HAIR} />
+          <Px x={14} y={42} w={8} h={6} c="#f6c8ba" />
+          <Px x={44} y={58} w={8} h={8} c={MUCOSA_DEEP} />
+          <Px x={46} y={60} w={4} h={4} c="#6a2830" />
+          <Px x={208} y={40} w={32} h={44} c={SKIN_EDGE} />
+          <Px x={212} y={44} w={28} h={36} c={SKIN} />
+          <Px x={222} y={50} w={18} h={24} c={MUCOSA} />
+          <Px x={228} y={56} w={12} h={12} c={MUCOSA_DEEP} />
+          {placed === null || !cut ? (
+            <CordRun x1={p.umbilicusX} x2={p.w - 16} y={p.cordY} />
+          ) : (
+            <>
+              <CordRun x1={p.umbilicusX} x2={xAt(placed) - 7} y={p.cordY} />
+              <CordRun x1={xAt(secondCm!) + 7} x2={p.w - 16} y={p.cordY} />
+            </>
+          )}
+          {[1, 2, 3, 4, 5].map((cm) => (
+            <Px key={cm} x={xAt(cm)} y={p.cordY + 14} w={2} h={6} c={INK} />
+          ))}
+          {Array.from({ length: 11 }, (_, i) => (
+            <Px key={i} x={xAt(MIN_CLAMP_CM)} y={p.cordY - 22 + i * 4} w={2} h={2} c={MARK} />
+          ))}
+          {cut && (
+            <>
+              <Px x={mid - 8} y={p.cordY - 16} w={4} h={4} c={METAL_DARK} />
+              <Px x={mid + 4} y={p.cordY - 16} w={4} h={4} c={METAL_DARK} />
+              <Px x={mid - 6} y={p.cordY - 12} w={2} h={10} c={METAL} />
+              <Px x={mid + 4} y={p.cordY - 12} w={2} h={10} c={METAL} />
+              <Px x={mid - 4} y={p.cordY - 4} w={8} h={2} c={METAL_DARK} />
+              <Px x={mid - 2} y={p.cordY + 8} w={2} h={4} c={BLOOD} />
+              <Px x={mid - 3} y={p.cordY + 12} w={4} h={3} c={BLOOD} />
+            </>
+          )}
+        </Pix>
         {placed !== null && <CordClamp x={xAt(placed)} y={p.cordY} bad={close} />}
-        {cut && secondCm !== null && (
-          <g style={{ pointerEvents: 'none' }}>
-            <CordClamp x={xAt(secondCm)} y={p.cordY} />
-            <g transform={`translate(${(xAt(placed!) + xAt(secondCm)) / 2} ${p.cordY - 2}) rotate(-40)`}>
-              <path d="M-8 -8 L2 2 M8 -8 L-2 2" stroke={METAL} strokeWidth="1.4" />
-              <circle cx="-10" cy="-10" r="2.4" fill="none" stroke={METAL} />
-              <circle cx="10" cy="-10" r="2.4" fill="none" stroke={METAL} />
-            </g>
-            <path d={`M${(xAt(placed!) + xAt(secondCm)) / 2} ${p.cordY + 6} q-1 6 1 10`} stroke={BLOOD} strokeWidth="1.2" fill="none" />
-          </g>
-        )}
-        <T x="6" y={p.h - 6} size="4.2" fill={close ? BAD : placed === null ? INK : MARK}>
-          {placed === null ? 'BABY SIDE, 2.5 cm OR FURTHER' : close ? `${placed.toFixed(1)} cm. TOO CLOSE` : `${placed.toFixed(1)} cm, THEN CUT BETWEEN`}
-        </T>
+        {cut && secondCm !== null && <CordClamp x={xAt(secondCm)} y={p.cordY} />}
+        <g style={{ pointerEvents: 'none' }}>
+          <T x="4" y="14" size="4.2">BABY</T>
+          <T x="196" y="14" size="4.2">MOTHER</T>
+          <T x={xAt(MIN_CLAMP_CM) - 14} y={p.cordY - 26} size="4" fill={MARK}>2.5 cm</T>
+          {[1, 2, 3, 4, 5].map((cm) => (
+            <T key={cm} x={xAt(cm) - 3} y={p.cordY + 30} size="4.4">{String(cm)}</T>
+          ))}
+          <T x="6" y={p.h - 6} size="4.2" fill={close ? BAD : placed === null ? INK : MARK}>
+            {placed === null ? 'BABY SIDE, 2.5 cm OR FURTHER' : close ? `${placed.toFixed(1)} cm. TOO CLOSE` : `${placed.toFixed(1)} cm, THEN CUT BETWEEN`}
+          </T>
+        </g>
       </svg>
     </div>
   )
@@ -483,52 +812,83 @@ export function DrugScene({ run, onPalpate, onInject, onFlag }: { run: NurseRun;
   const early = run.drugEarly
   return (
     <Stage h={200}>
+      <Pix>
+        <Px x={86} y={24} w={146} h={112} c={SKIN_EDGE} />
+        <Px x={90} y={28} w={138} h={104} c={SKIN} />
+        <Px x={100} y={36} w={24} h={12} c={HI} />
+        <Px x={148} y={4} w={20} h={8} c={HAIR} />
+        <Px x={146} y={10} w={24} h={16} c={BABY} />
+        <Px x={150} y={14} w={4} h={3} c="#1a1410" />
+        <Px x={158} y={14} w={4} h={3} c="#1a1410" />
+        <Px x={152} y={18} w={8} h={2} c="#c06070" />
+        <Px x={140} y={24} w={36} h={16} c={BABY_SHADE} />
+        <Px x={144} y={26} w={28} h={12} c={BABY} />
+        {run.palpated ? (
+          <>
+            <Px x={136} y={50} w={32} h={6} c="#a05040" />
+            <Px x={128} y={56} w={48} h={8} c="#a05040" />
+            <Px x={124} y={64} w={56} h={16} c="#c87060" />
+            <Px x={132} y={68} w={20} h={8} c="#d8a090" />
+            <Px x={128} y={80} w={48} h={8} c="#a05040" />
+            <Px x={136} y={88} w={32} h={6} c="#c87060" />
+          </>
+        ) : (
+          <>
+            <Px x={128} y={48} w={48} h={6} c={SKIN_EDGE} />
+            <Px x={120} y={54} w={64} h={8} c="#e8b0a0" />
+            <Px x={116} y={62} w={72} h={16} c="#f0c0b0" />
+            <Px x={120} y={78} w={64} h={8} c="#e8b0a0" />
+            <Px x={128} y={86} w={48} h={6} c={SKIN_EDGE} />
+          </>
+        )}
+        {run.palpated && (
+          <>
+            <Px x={108} y={58} w={18} h={10} c={GLOVE} />
+            <Px x={110} y={54} w={4} h={8} c="#f4ecd4" />
+            <Px x={116} y={52} w={4} h={10} c={GLOVE} />
+            <Px x={122} y={56} w={4} h={6} c={GLOVE_DARK} />
+            <Px x={186} y={58} w={18} h={10} c={GLOVE} />
+            <Px x={186} y={54} w={4} h={8} c="#f4ecd4" />
+            <Px x={192} y={52} w={4} h={10} c={GLOVE} />
+            <Px x={198} y={56} w={4} h={6} c={GLOVE_DARK} />
+          </>
+        )}
+        <Px x={8} y={48} w={70} h={88} c={early ? BAD : SKIN_EDGE} />
+        <Px x={12} y={52} w={62} h={80} c={early ? '#f3c2c6' : SKIN} />
+        <Px x={16} y={60} w={16} h={28} c={early ? '#f8d0d4' : HI} />
+        <Px x={20} y={120} w={40} h={12} c={early ? '#e8a0a8' : SKIN_DARK} />
+        <PxSyringe x={12} y={78} pushed={run.syntometrine} bad={early} />
+        <PxClock x={16} y={150} noted={run.drugTime} />
+        <PxBottle x={86} y={152} cap="#6a3d8a" />
+        {run.edta && (
+          <>
+            <Px x={108} y={162} w={28} h={16} c="#fff" />
+            <Px x={108} y={162} w={28} h={2} c={MARK} />
+            <Px x={108} y={176} w={28} h={2} c={MARK} />
+          </>
+        )}
+        <PxBottle x={168} y={152} cap="#b03040" />
+        {run.clotted && (
+          <>
+            <Px x={190} y={162} w={28} h={16} c="#fff" />
+            <Px x={190} y={162} w={28} h={2} c={MARK} />
+            <Px x={190} y={176} w={28} h={2} c={MARK} />
+          </>
+        )}
+      </Pix>
       <g style={{ pointerEvents: 'none' }}>
-        <path d="M78 28 H210 Q226 90 200 140 H90 Q70 90 78 28 Z" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M8 70 H78 L86 150 H4 Z" fill={SKIN} stroke={SKIN_EDGE} />
-        <ellipse cx="156" cy="22" rx="16" ry="10" fill="#e8a898" stroke={SKIN_EDGE} />
-        <circle cx="156" cy="12" r="6" fill="#e8a898" stroke={SKIN_EDGE} />
-        <path d="M150 8 Q156 2 162 8 Q156 6 150 8 Z" fill="#f0c8d8" />
         <T x="8" y="14" size="4">HER R THIGH</T>
-      </g>
-      <Hot id="nurse-palpate" x={90} y={32} w={130} h={84} on={run.palpated} onPress={onPalpate}>
-        <ellipse cx="156" cy="74" rx={run.palpated ? 28 : 36} ry={run.palpated ? 26 : 22} fill={run.palpated ? '#c87060' : '#e8b0a0'} opacity="0.85" stroke="#a05040" strokeDasharray={run.palpated ? undefined : '3 2'} />
-        {run.palpated && <path d="M136 70 q16 -14 28 2 q-8 16 -28 8" fill="#d8a090" stroke={SKIN_EDGE} />}
         {run.palpated && <T x="124" y="108" size="4" fill={MARK}>ONE BABY</T>}
-      </Hot>
-      {run.palpated && (
-        <g style={{ pointerEvents: 'none' }}>
-          <Hand x={124} y={78} angle={-60} scale={0.72} press />
-          <Hand x={188} y={78} angle={60} scale={0.72} press />
-        </g>
-      )}
-      <Hot id="nurse-syntometrine" x={8} y={40} w={70} h={96} on={run.syntometrine && !early} onPress={onInject}>
-        <ellipse cx="40" cy="96" rx="22" ry="30" fill={early ? '#f3c2c6' : SKIN} stroke={early ? BAD : SKIN_EDGE} />
-        <g transform="translate(40 78) rotate(-90)">
-          <line x1="0" y1="0" x2="8" y2="0" stroke="#9098a8" strokeWidth="0.8" />
-          <rect x="8" y="-3" width="26" height="6" fill="#f4f8fc" stroke="#6878a0" />
-          <rect x={run.syntometrine ? 22 : 10} y="-2.2" width={run.syntometrine ? 8 : 20} height="4.4" fill={early ? '#f0b0b8' : '#d8e8f8'} />
-          <rect x={run.syntometrine ? 30 : 32} y="-4" width="2" height="8" fill="#404858" />
-        </g>
-        <T x="14" y="128" size="3.6" fill={early ? BAD : INK}>{early ? 'TOO SOON' : run.syntometrine ? '1 ml IM' : '1 ml'}</T>
-      </Hot>
-      <Hot id="nurse-drug-time" x={8} y={148} w={52} h={46} on={run.drugTime} onPress={() => onFlag('drugTime')}>
-        <circle cx="34" cy="168" r="16" fill={run.drugTime ? '#e5f5df' : '#fff'} stroke={run.drugTime ? MARK : INK} />
-        <path d="M34 168 V158 M34 168 L42 172" stroke={INK} strokeWidth="1.2" />
-        <T x="18" y="190" size="3.6">{run.drugTime ? 'NOTED' : 'TIME'}</T>
-      </Hot>
-      <Hot id="nurse-label-edta" x={66} y={148} w={80} h={46} on={run.edta} onPress={() => onFlag('edta')}>
-        <rect x="86" y="156" width="22" height="30" rx="2" fill="#f4f4f8" stroke="#6878a0" />
-        <rect x="88" y="152" width="18" height="6" fill="#6a3d8a" />
-        {run.edta && <rect x="112" y="162" width="28" height="16" fill="#fff" stroke={MARK} />}
-        <T x="114" y="174" size="3.6">{run.edta ? 'LAI' : 'EDTA'}</T>
-      </Hot>
-      <Hot id="nurse-label-clotted" x={152} y={148} w={80} h={46} on={run.clotted} onPress={() => onFlag('clotted')}>
-        <rect x="168" y="156" width="22" height="30" rx="2" fill="#f4f4f8" stroke="#a86858" />
-        <rect x="170" y="152" width="18" height="6" fill="#b03040" />
-        {run.clotted && <rect x="194" y="162" width="28" height="16" fill="#fff" stroke={MARK} />}
-        <T x="196" y="174" size="3.6">{run.clotted ? 'LAI' : 'TSH'}</T>
-      </Hot>
+        <T x="14" y="132" size="3.6" fill={early ? BAD : INK}>{early ? 'TOO SOON' : run.syntometrine ? '1 ml IM' : '1 ml'}</T>
+        <T x="16" y="192" size="3.6">{run.drugTime ? 'NOTED' : 'TIME'}</T>
+        <T x="112" y="174" size="3.6">{run.edta ? 'LAI' : 'EDTA'}</T>
+        <T x="194" y="174" size="3.6">{run.clotted ? 'LAI' : 'TSH'}</T>
+      </g>
+      <Hot id="nurse-palpate" x={90} y={32} w={130} h={84} on={run.palpated} onPress={onPalpate} />
+      <Hot id="nurse-syntometrine" x={8} y={40} w={70} h={96} on={run.syntometrine && !early} onPress={onInject} />
+      <Hot id="nurse-drug-time" x={8} y={148} w={52} h={46} on={run.drugTime} onPress={() => onFlag('drugTime')} />
+      <Hot id="nurse-label-edta" x={66} y={148} w={80} h={46} on={run.edta} onPress={() => onFlag('edta')} />
+      <Hot id="nurse-label-clotted" x={152} y={148} w={80} h={46} on={run.clotted} onPress={() => onFlag('clotted')} />
     </Stage>
   )
 }
@@ -539,59 +899,83 @@ export function MotherScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'gus
   const cordY2 = run.lengthen ? 154 : 142
   return (
     <Stage h={268}>
+      <Pix>
+        <Px x={0} y={0} w={156} h={164} c={DRAPE} />
+        <Px x={0} y={0} w={20} h={164} c={DRAPE_DARK} />
+        <Px x={16} y={28} w={36} h={100} c={SKIN_EDGE} />
+        <Px x={20} y={32} w={28} h={92} c={SKIN} />
+        <Px x={108} y={28} w={36} h={100} c={SKIN_EDGE} />
+        <Px x={112} y={32} w={28} h={92} c={SKIN} />
+        <Px x={52} y={36} w={56} h={28} c={SKIN_DARK} />
+        <Px x={run.lengthen ? 56 : 64} y={56} w={run.lengthen ? 48 : 32} h={run.lengthen ? 28 : 20} c={MUCOSA_DEEP} />
+        <Px x={run.lengthen ? 60 : 68} y={60} w={run.lengthen ? 40 : 24} h={run.lengthen ? 20 : 12} c={MUCOSA} />
+        {run.lengthen && <Px x={68} y={66} w={24} h={12} c="#7a1424" />}
+        <Px x={114} y={86} w={8} h={cordY2 - 86} c={CORD} />
+        {Array.from({ length: Math.floor((cordY2 - 86) / 6) }, (_, i) => (
+          <Px key={i} x={114} y={86 + i * 6} w={8} h={2} c={CORD_STRIPE} />
+        ))}
+        {run.gush ? (
+          <>
+            <Px x={100} y={84} w={8} h={10} c={BLOOD} />
+            <Px x={96} y={92} w={12} h={8} c={BLOOD} />
+            <Px x={108} y={96} w={8} h={12} c={BLOOD} />
+            <Px x={104} y={104} w={6} h={6} c="#c04048" />
+          </>
+        ) : (
+          <Px x={112} y={90} w={10} h={8} c={BLOOD} />
+        )}
+        <Px x={160} y={22} w={68} h={48} c={INK} />
+        <Px x={162} y={24} w={64} h={44} c={SKIN} />
+        <Px x={run.fundus ? 182 : 170} y={run.fundus ? 36 : 42} w={run.fundus ? 28 : 40} h={run.fundus ? 22 : 18} c={run.fundus ? '#a05040' : '#e8b0a0'} />
+        <Px x={run.fundus ? 186 : 176} y={run.fundus ? 40 : 46} w={run.fundus ? 16 : 24} h={run.fundus ? 10 : 8} c={run.fundus ? '#c87060' : '#f0c0b0'} />
+        <Px x={168} y={108} w={36} h={36} c="#9aa0b8" />
+        <Px x={172} y={112} w={28} h={28} c="#eef0f4" />
+        <Px x={176} y={124} w={8} h={8} c="#f0e0e0" />
+        <Px x={178} y={126} w={4} h={4} c="#b03040" />
+        <Px x={192} y={124} w={8} h={8} c="#f0e0e0" />
+        <Px x={194} y={126} w={4} h={4} c="#b03040" />
+        <Px x={180} y={114} w={16} h={10} c="#f0e0e0" />
+        <Px x={182} y={116} w={12} h={6} c="#6a2838" />
+        <Px x={16} y={176} w={36} h={24} c="#7a1424" />
+        <Px x={20} y={180} w={28} h={16} c="#5a1020" />
+        <Px x={14} y={174} w={48} h={28} c="#607080" />
+        <Px x={16} y={186} w={44} h={14} c="#dfe8ea" />
+        {run.bag && <Px x={16} y={178} w={44} h={3} c={MARK} />}
+        <Px x={96} y={180} w={48} h={22} c="#d8d8cc" />
+        <Px x={100} y={184} w={40} h={14} c="#f7f7f2" />
+        <Px x={104} y={188} w={32} h={3} c="#7eb6e0" />
+        <Px x={168} y={180} w={56} h={22} c={run.warm ? '#f4f4ec' : '#e7d7c4'} />
+        <Px x={172} y={184} w={48} h={2} c="#dcdcd0" />
+        <Px x={170} y={190} w={50} h={2} c="#dcdcd0" />
+        <Px x={172} y={196} w={44} h={2} c="#dcdcd0" />
+        <Px x={24} y={228} w={32} h={28} c="#7a90a0" />
+        <Px x={28} y={232} w={24} h={20} c="#e7eef2" />
+        <Px x={32} y={242} w={16} h={8} c={BLOOD} />
+        <Px x={96} y={232} w={88} h={14} c={SKIN_EDGE} />
+        <Px x={100} y={234} w={80} h={10} c={SKIN} />
+        <Px x={108} y={230} w={6} h={16} c={GLOVE} />
+        <Px x={118} y={228} w={6} h={18} c={GLOVE} />
+        <Px x={116} y={236} w={4} h={4} c={GLOVE_DARK} />
+      </Pix>
       <g style={{ pointerEvents: 'none' }}>
-        <rect y="0" width="240" height="160" fill={DRAPE} />
-        <ellipse cx="118" cy="86" rx="52" ry="44" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M0 8 Q40 24 36 80 Q32 130 14 160 L0 160 Z" fill={DRAPE_DARK} />
-        <path d="M150 8 Q168 24 156 70 L150 8" fill={DRAPE_DARK} />
-        <ellipse cx="118" cy="78" rx={run.lengthen ? 18 : 12} ry={run.lengthen ? 16 : 10} fill={MUCOSA} stroke={MUCOSA_DEEP} />
-        {run.lengthen && <ellipse cx="118" cy="82" rx="12" ry="8" fill="#7a1424" stroke="#3a0810" />}
-        <line x1="118" y1="86" x2="118" y2={cordY2} stroke={CORD} strokeWidth="6" />
-        <line x1="118" y1="86" x2="118" y2={cordY2} stroke={CORD_STRIPE} strokeWidth="6" strokeDasharray="2 4" />
         <T x="6" y="14" size="4" fill="#f8f8f0">FROM THE FOOT</T>
-      </g>
-      <Hot id="nurse-sign-fundus" x={156} y={18} w={76} h={56} on={run.fundus} onPress={() => onFlag('fundus')}>
-        <rect x="160" y="22" width="68" height="48" rx="3" fill={SKIN} stroke={INK} />
-        <ellipse cx="194" cy={run.fundus ? 38 : 52} rx={run.fundus ? 12 : 18} ry={run.fundus ? 12 : 10} fill={run.fundus ? '#c87060' : '#e8b0a0'} stroke="#a05040" strokeDasharray={run.fundus ? undefined : '2 1.5'} />
-        <T x="166" y="32" size="3.4">{run.fundus ? 'FIRM' : 'FUNDUS'}</T>
-      </Hot>
-      <Hot id="nurse-sign-gush" x={96} y={78} w={44} h={34} on={run.gush} onPress={() => onFlag('gush')}>
-        <path d={run.gush ? 'M108 82 q-10 16 -4 26 q6 4 10 0 q4 8 8 -2 q-2 -16 -14 -24 Z' : 'M114 84 q-4 10 -1 16 q3 2 4 0 Z'} fill={BLOOD} opacity="0.9" />
-      </Hot>
-      <Hot id="nurse-sign-length" x={98} y={116} w={40} h={36} on={run.lengthen} onPress={() => onFlag('lengthen')} />
-      <Hot id="nurse-vessels" x={162} y={96} w={70} h={56} on={run.vessels} onPress={() => onFlag('vessels')}>
-        <circle cx="184" cy="124" r="16" fill="#eef0f4" stroke="#9aa0b8" />
-        <circle cx="176" cy="128" r="4" fill="#b03040" stroke="#f0e0e0" strokeWidth="1.4" />
-        <circle cx="192" cy="128" r="4" fill="#b03040" stroke="#f0e0e0" strokeWidth="1.4" />
-        <ellipse cx="184" cy="116" rx="6" ry="4.5" fill="#6a2838" stroke="#f0e0e0" />
+        <T x="166" y="34" size="3.4">{run.fundus ? 'FIRM' : 'FUNDUS'}</T>
         <T x="166" y="148" size="3.4">{run.vessels ? '2 ART 1 VEIN' : 'CUT END'}</T>
-      </Hot>
-      <Hot id="nurse-bag" x={8} y={168} w={70} h={46} on={run.bag} onPress={() => onFlag('bag')}>
-        <ellipse cx="32" cy="186" rx="14" ry="10" fill="#7a1424" stroke="#3a0810" />
-        <path d="M16 180 H58 V206 H16 Z" fill="#dfe8ea" stroke="#607080" opacity="0.85" />
-        {run.bag && <path d="M16 180 H58" stroke={MARK} strokeWidth="2" />}
-        <T x="18" y="198" size="3.6">{run.bag ? 'SEALED' : 'BAG'}</T>
-      </Hot>
-      <Hot id="nurse-pad-on" x={84} y={168} w={72} h={46} on={run.padOn} onPress={() => onFlag('padOn')}>
-        <rect x="96" y="180" width="48" height="22" rx="4" fill="#f7f7f2" stroke="#b0b0a4" />
-        <path d="M100 191 h40" stroke="#7eb6e0" strokeWidth="3" />
-        <T x="100" y="176" size="3.6">PAD</T>
-      </Hot>
-      <Hot id="nurse-warm" x={162} y={168} w={70} h={46} on={run.warm} onPress={() => onFlag('warm')}>
-        <path d="M170 184 H224 L220 208 H166 Z" fill={run.warm ? '#f4f4ec' : '#e7d7c4'} stroke="#b8b8a8" />
-        <path d="M174 192 h44 M172 200 h46" stroke="#dcdcd0" />
-        <T x="176" y="180" size="3.6">BLANKET</T>
-      </Hot>
-      <Hot id="nurse-loss" x={8} y={220} w={70} h={42} on={run.loss} onPress={() => onFlag('loss')}>
-        <path d="M24 228 H52 L48 254 H28 Z" fill="#e7eef2" stroke="#7a90a0" />
-        <rect x="30" y="242" width="16" height="10" fill={BLOOD} opacity="0.75" />
-        <T x="14" y="258" size="3.4" fill={run.loss ? MARK : INK}>{run.loss ? 'UNDER 500' : 'LOSS'}</T>
-      </Hot>
-      <Hot id="nurse-pulse" x={84} y={220} w={148} h={42} on={run.pulse} onPress={() => onFlag('pulse')}>
-        <path d="M100 236 H200" stroke={SKIN} strokeWidth="10" strokeLinecap="round" />
-        <path d="M120 228 v16 M132 226 v18" stroke="#efe3c8" strokeWidth="4" strokeLinecap="round" />
+        <T x="18" y="204" size="3.6">{run.bag ? 'SEALED' : 'BAG'}</T>
+        <T x="108" y="176" size="3.6">PAD</T>
+        <T x="176" y="176" size="3.6">BLANKET</T>
+        <T x="12" y="262" size="3.4" fill={run.loss ? MARK : INK}>{run.loss ? 'UNDER 500' : 'LOSS'}</T>
         <T x="150" y="248" size="3.8">{run.pulse ? 'PULSE STEADY' : 'HER WRIST'}</T>
-      </Hot>
+      </g>
+      <Hot id="nurse-sign-fundus" x={156} y={18} w={76} h={56} on={run.fundus} onPress={() => onFlag('fundus')} />
+      <Hot id="nurse-sign-gush" x={96} y={78} w={44} h={34} on={run.gush} onPress={() => onFlag('gush')} />
+      <Hot id="nurse-sign-length" x={98} y={116} w={40} h={36} on={run.lengthen} onPress={() => onFlag('lengthen')} />
+      <Hot id="nurse-vessels" x={162} y={96} w={70} h={56} on={run.vessels} onPress={() => onFlag('vessels')} />
+      <Hot id="nurse-bag" x={8} y={168} w={70} h={46} on={run.bag} onPress={() => onFlag('bag')} />
+      <Hot id="nurse-pad-on" x={84} y={168} w={72} h={46} on={run.padOn} onPress={() => onFlag('padOn')} />
+      <Hot id="nurse-warm" x={162} y={168} w={70} h={46} on={run.warm} onPress={() => onFlag('warm')} />
+      <Hot id="nurse-loss" x={8} y={220} w={70} h={42} on={run.loss} onPress={() => onFlag('loss')} />
+      <Hot id="nurse-pulse" x={84} y={220} w={148} h={42} on={run.pulse} onPress={() => onFlag('pulse')} />
     </Stage>
   )
 }
@@ -601,52 +985,64 @@ export function MotherScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'gus
 export function HandoverScene({ run, onFlag }: { run: NurseRun; onFlag: (key: 'stable' | 'ward' | 'specimens' | 'papers' | 'escort') => void }) {
   return (
     <Stage h={220}>
+      <Pix>
+        <Px x={12} y={36} w={130} h={28} c="#c5ced6" />
+        <Px x={16} y={32} w={40} h={8} c="#f4f1e8" />
+        <Px x={20} y={28} w={28} h={12} c={SKIN} />
+        <Px x={24} y={24} w={16} h={6} c={HAIR} />
+        <Px x={26} y={30} w={3} h={2} c="#1a1410" />
+        <Px x={34} y={30} w={3} h={2} c="#1a1410" />
+        <Px x={70} y={30} w={28} h={8} c="#f0c8d8" />
+        <Px x={72} y={36} w={24} h={16} c={BABY} />
+        <Px x={76} y={40} w={3} h={2} c="#1a1410" />
+        <Px x={86} y={40} w={3} h={2} c="#1a1410" />
+        <Px x={22} y={62} w={12} h={6} c={METAL_DARK} />
+        <Px x={118} y={62} w={12} h={6} c={METAL_DARK} />
+        <Px x={176} y={28} w={36} h={48} c={INK} />
+        <Px x={180} y={32} w={28} h={28} c={run.ward ? '#d7f0e0' : '#8fd0c8'} />
+        <Px x={184} y={36} w={8} h={2} c="#fff" />
+        <Px x={184} y={42} w={16} h={2} c={INK} />
+        <Px x={184} y={48} w={12} h={2} c={INK} />
+        <Px x={190} y={64} w={8} h={6} c="#c8c0b0" />
+        <Px x={14} y={124} w={96} h={28} c="#7d8b98" />
+        <Px x={18} y={128} w={88} h={20} c="#d5dde4" />
+        <PxBottle x={24} y={124} cap="#6a3d8a" />
+        <PxBottle x={42} y={124} cap="#b03040" />
+        <Px x={62} y={132} w={22} h={14} c="#607080" />
+        <Px x={64} y={134} w={18} h={10} c="#dfe8ea" />
+        <Px x={68} y={136} w={10} h={6} c="#7a1424" />
+        <Px x={132} y={122} w={36} h={30} c={INK} />
+        <Px x={134} y={124} w={32} h={26} c="#fff" />
+        <Px x={138} y={130} w={24} h={2} c="#c8c0b0" />
+        <Px x={138} y={136} w={18} h={2} c="#c8c0b0" />
+        <Px x={172} y={126} w={36} h={28} c="#a09040" />
+        <Px x={174} y={128} w={32} h={24} c="#fff8e8" />
+        <Px x={178} y={134} w={20} h={2} c="#c8b060" />
+        <Px x={178} y={140} w={16} h={2} c="#c8b060" />
+        <PxFace x={16} y={172} />
+        <Px x={18} y={196} w={24} h={14} c={GOWN} />
+        <Px x={14} y={204} w={10} h={6} c={GLOVE} />
+        <Px x={52} y={186} w={24} h={18} c="#b03040" />
+        <Px x={54} y={188} w={20} h={4} c="#d04858" />
+        <Px x={86} y={182} w={16} h={26} c={INK} />
+        <Px x={88} y={186} w={12} h={12} c="#8fd0c8" />
+        <Px x={120} y={196} w={90} h={4} c="#8a929c" />
+        <Px x={120} y={192} w={16} h={4} c="#c5ced6" />
+        <Px x={140} y={192} w={16} h={4} c="#c5ced6" />
+      </Pix>
       <g style={{ pointerEvents: 'none' }}>
-        <rect x="8" y="70" width="150" height="8" fill="#c5ced6" />
-        <circle cx="28" cy="86" r="6" fill="#8a929c" />
-        <circle cx="130" cy="86" r="6" fill="#8a929c" />
-      </g>
-      <Hot id="nurse-stable" x={8} y={8} w={150} h={64} on={run.stable} onPress={() => onFlag('stable')}>
-        <rect x="16" y="28" width="130" height="36" rx="4" fill="#e7eef2" stroke="#8aa0b0" />
-        <circle cx="46" cy="40" r="10" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M36 36 Q46 28 56 36" fill={HAIR} />
-        <ellipse cx="100" cy="46" rx="18" ry="12" fill="#e8a898" stroke={SKIN_EDGE} />
-        <circle cx="100" cy="34" r="7" fill="#e8a898" stroke={SKIN_EDGE} />
-        <T x="20" y="24" size="3.8">{run.stable ? 'BOTH STEADY' : 'MOTHER AND BABY'}</T>
-      </Hot>
-      <Hot id="nurse-ward" x={164} y={12} w={68} h={72} on={run.ward} onPress={() => onFlag('ward')}>
-        <rect x="180" y="28" width="36" height="48" rx="4" fill="#2c2416" />
-        <rect x="184" y="34" width="28" height="28" fill={run.ward ? '#d7f0e0' : '#8fd0c8'} />
-        <T x="186" y="50" size="3.4" fill={INK}>{run.ward ? 'WARD' : 'CALL'}</T>
-        <circle cx="198" cy="70" r="3" fill="#c8c0b0" />
-      </Hot>
-      <Hot id="nurse-specimens" x={8} y={112} w={108} h={48} on={run.specimens} onPress={() => onFlag('specimens')}>
-        <rect x="14" y="124" width="96" height="28" rx="3" fill="#d5dde4" stroke="#7d8b98" />
-        <rect x="22" y="128" width="10" height="16" fill="#f4f4f8" stroke="#6878a0" />
-        <rect x="24" y="126" width="6" height="4" fill="#6a3d8a" />
-        <rect x="38" y="128" width="10" height="16" fill="#f4f4f8" stroke="#a86858" />
-        <rect x="40" y="126" width="6" height="4" fill="#b03040" />
-        <rect x="56" y="130" width="22" height="16" fill="#dfe8ea" stroke="#607080" />
-        <ellipse cx="67" cy="136" rx="6" ry="4" fill="#7a1424" />
+        <T x="16" y="22" size="3.8">{run.stable ? 'BOTH STEADY' : 'MOTHER AND BABY'}</T>
+        <T x="184" y="50" size="3.4" fill={INK}>{run.ward ? 'WARD' : 'CALL'}</T>
         <T x="82" y="142" size="3.4">TRAY</T>
-      </Hot>
-      <Hot id="nurse-papers" x={124} y={112} w={108} h={48} on={run.papers} onPress={() => onFlag('papers')}>
-        <rect x="136" y="122" width="40" height="30" fill="#fff" stroke={INK} />
-        <rect x="168" y="126" width="40" height="28" fill="#fff8e8" stroke="#a09040" />
-        <T x="140" y="140" size="3.4">NOTES</T>
-        <T x="174" y="144" size="3.4">BBA</T>
-      </Hot>
-      <Hot id="nurse-escort" x={8} y={168} w={224} h={44} on={run.escort} onPress={() => onFlag('escort')}>
-        <circle cx="36" cy="184" r="8" fill={SKIN} stroke={SKIN_EDGE} />
-        <path d="M28 198 H48 L52 206 H24 Z" fill="#2f6fad" />
-        <rect x="56" y="186" width="22" height="16" rx="2" fill="#b03040" />
-        <rect x="88" y="184" width="16" height="24" rx="2" fill="#2c2416" />
-        <rect x="90" y="188" width="12" height="10" fill="#8fd0c8" />
-        <path d="M120 196 H210" stroke="#8a929c" strokeWidth="3" />
+        <T x="138" y="146" size="3.4">NOTES</T>
+        <T x="178" y="146" size="3.4">BBA</T>
         <T x="120" y="188" size="3.8">WALK, BAG, PHONE</T>
-      </Hot>
+      </g>
+      <Hot id="nurse-stable" x={8} y={8} w={150} h={64} on={run.stable} onPress={() => onFlag('stable')} />
+      <Hot id="nurse-ward" x={164} y={12} w={68} h={72} on={run.ward} onPress={() => onFlag('ward')} />
+      <Hot id="nurse-specimens" x={8} y={112} w={108} h={48} on={run.specimens} onPress={() => onFlag('specimens')} />
+      <Hot id="nurse-papers" x={124} y={112} w={108} h={48} on={run.papers} onPress={() => onFlag('papers')} />
+      <Hot id="nurse-escort" x={8} y={168} w={224} h={44} on={run.escort} onPress={() => onFlag('escort')} />
     </Stage>
   )
 }
-
-
