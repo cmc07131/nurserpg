@@ -25,6 +25,7 @@ const require = createRequire(path.join(root, 'package.json'))
 const ENTRY = `import { createRoot } from 'react-dom/client'
 import { Suspense, lazy } from 'react'
 import { PROCEDURES } from '../src/game/procedures'
+import { NURSE_LINES } from '../src/game/nurse/model'
 import { compileStation, stationSchema } from '../src/engine/station'
 const Exam3D = lazy(() => import('../src/game/exam3d/Exam3D'))
 const w = window as any
@@ -35,7 +36,7 @@ const params = new URLSearchParams(location.search)
 const kind = params.get('kind') ?? 'cvc'
 const exam = params.get('exam')
 const Bench = (PROCEDURES as any)[kind]
-const job = { actionId: 'verify', spendId: 'verify', kind, hint: '', label: kind, reply: '', grantMarks: Array.from({ length: 12 }, (_, i) => 'm' + (i + 1)), grantItems: [], scene: 'done', endStation: false, pose: params.get('pose') ?? undefined }
+const job = { actionId: 'verify', spendId: 'verify', kind, hint: '', label: kind, reply: '', grantMarks: kind === 'nurse' ? [...NURSE_LINES] : Array.from({ length: 12 }, (_, i) => 'm' + (i + 1)), grantItems: [], scene: 'done', endStation: false, pose: params.get('pose') ?? undefined }
 w.__result = null
 w.__kinds = Object.keys(PROCEDURES)
 w.__picked = []
@@ -96,8 +97,8 @@ function build() {
   mkdirSync(out, { recursive: true })
   const entry = path.join(root, '.verify/entry.tsx')
   writeFileSync(entry, ENTRY)
-  const esbuild = path.join(root, 'node_modules/.bin', process.platform === 'win32' ? 'esbuild.cmd' : 'esbuild')
-  const r = spawnSync(esbuild, [entry, '--bundle', `--outfile=${path.join(out, 'bundle.js')}`, '--jsx=automatic', '--loader:.woff2=file', '--loader:.woff=file', (process.env.VERIFY_DEV ? '--define:import.meta.env.DEV=true' : '--define:import.meta.env.DEV=false'), '--define:process.env.NODE_ENV="production"', `--alias:~=${path.join(root, 'src')}`, '--log-level=warning'], { stdio: 'inherit', shell: process.platform === 'win32' })
+  const esbuild = path.join(root, 'node_modules/esbuild/bin/esbuild')
+  const r = spawnSync(process.execPath, [esbuild, entry, '--bundle', `--outfile=${path.join(out, 'bundle.js')}`, '--jsx=automatic', '--loader:.woff2=file', '--loader:.woff=file', (process.env.VERIFY_DEV ? '--define:import.meta.env.DEV=true' : '--define:import.meta.env.DEV=false'), '--define:process.env.NODE_ENV="production"', `--alias:~=${path.join(root, 'src')}`, '--log-level=warning'], { stdio: 'inherit' })
   if (r.status !== 0) {
     console.error('BUILD FAILED')
     process.exit(1)
