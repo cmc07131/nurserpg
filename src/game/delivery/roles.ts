@@ -1,6 +1,6 @@
 import type { Pack } from '~/engine/schema'
 
-/** Who you are in the room. The birth and the third stage are the same steps for every role. */
+/** Who you are in the room. Doctor and midwife conduct the birth. The AED nurse does her own job. */
 export type RoleId = 'doctor' | 'midwife' | 'nurse'
 
 export type RoleBrief = {
@@ -48,9 +48,9 @@ export const ROLES: Record<RoleId, RoleBrief> = {
   nurse: {
     id: 'nurse',
     short: 'AED nurse',
-    blurb: 'Nursing management of the room',
+    blurb: 'You nurse the A&E birth',
     partner: 'Nurse Chiu',
-    stem: 'Birth room. Mrs Lai, 28, is at 39 weeks in her second pregnancy. The pregnancy has been normal. The head is crowning. There are no complications.\n\nYou are the AED nurse. You run the room for Nurse Chiu, the midwife: call the right people, set out the pack, keep the baby warm, and have the oxytocin ready. Then walk the delivery and the third stage, so the order is yours.',
+    stem: 'A&E. Mrs Lai, 28, is at 39 weeks in her second pregnancy. The pregnancy has been normal. The head is crowning. There are no complications.\n\nYou are the AED nurse. Nurse Chiu, the midwife, conducts the birth. You do not conduct the birth, and you do not assess the cervix.',
     prepHint: 'Nursing management: call both nurses, set out the pack, warmth, oxytocin drawn up and labelled.',
     prep: [
       'Call Nurse Chiu and the neonatal nurse: one for Mrs Lai, one for the baby',
@@ -64,7 +64,7 @@ export const ROLES: Record<RoleId, RoleBrief> = {
 const ROLE_KEY = 'nurserpg:role'
 
 export function parseRole(value: unknown): RoleId {
-  return value === 'doctor' || value === 'midwife' || value === 'nurse' ? value : 'midwife'
+  return value === 'doctor' || value === 'midwife' || value === 'nurse' ? value : 'nurse'
 }
 
 export function writeRole(role: RoleId) {
@@ -79,28 +79,43 @@ export function readRole(): RoleId {
   try {
     return parseRole(localStorage.getItem(ROLE_KEY))
   } catch {
-    return 'midwife'
+    return 'nurse'
   }
 }
 
 /**
- * Same marks and the same benches. The role changes who you are, who you speak to, and how the preparation is worded.
- * The pack from the loader is left untouched.
+ * The pack from the loader is left untouched. Doctor and midwife drop the nurse step and keep today's prep wording.
+ * The nurse keeps only her step, so the birth benches are not hers.
  */
 export function applyRole(pack: Pack, role: RoleId): Pack {
   const brief = ROLES[role]
-  return {
-    ...pack,
-    title: `${brief.short} · Normal delivery`,
-    meta: { ...pack.meta, stem: brief.stem },
-    cast: pack.cast.map((person) => (person.id === 'midwife' ? { ...person, displayName: brief.partner } : person)),
-    actions: pack.actions.map((action) => {
-      if (action.id !== 'prep' || !action.options) return action
+  const nurse = role === 'nurse'
+  const actions = pack.actions
+    .filter((action) => (nurse ? action.id === 'nurse' : action.id !== 'nurse'))
+    .map((action) => {
+      if (nurse || action.id !== 'prep' || !action.options) return action
       return {
         ...action,
         hint: brief.prepHint,
         options: action.options.map((opt, i) => ({ ...opt, label: brief.prep[i] ?? opt.label })),
       }
-    }),
+    })
+  const ids = new Set(actions.map((action) => action.id))
+  const markIds = new Set<string>()
+  for (const action of actions) {
+    for (const id of action.marksChecklistIds ?? []) markIds.add(id)
+    for (const opt of action.options ?? []) for (const id of opt.marksChecklistIds ?? []) markIds.add(id)
+  }
+  return {
+    ...pack,
+    title: nurse ? 'AED nurse · Imminent birth' : `${brief.short} · Normal delivery`,
+    meta: { ...pack.meta, stem: brief.stem },
+    cast: pack.cast.map((person) => (person.id === 'midwife' ? { ...person, displayName: brief.partner } : { ...person })),
+    actions,
+    phases: (pack.phases ?? [])
+      .filter((phase) => (nurse ? phase.steps.every((id) => id === 'nurse') : phase.steps.every((id) => id !== 'nurse')))
+      .map((phase) => ({ ...phase, steps: [...phase.steps] })),
+    goldPath: pack.goldPath.filter((id) => ids.has(id)),
+    marks: pack.marks.filter((mark) => markIds.has(mark.id)),
   }
 }

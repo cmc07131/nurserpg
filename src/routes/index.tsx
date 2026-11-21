@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
   component: TitlePage,
 })
 
-const CHOICES: RoleId[] = ['doctor', 'midwife', 'nurse']
+const CHOICES: RoleId[] = ['nurse', 'doctor', 'midwife']
 
 function TitlePage() {
   const navigate = useNavigate()

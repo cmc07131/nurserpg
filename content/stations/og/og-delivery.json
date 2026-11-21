@@ -26,6 +26,13 @@
       "steps": [
         "third"
       ]
+    },
+    {
+      "title": "A&E nurse",
+      "goal": "Recognise imminent birth and do the nurse's job while the midwife delivers.",
+      "steps": [
+        "nurse"
+      ]
     }
   ],
   "review": [],
@@ -121,6 +128,30 @@
             "Checks tone, tears and blood loss"
           ],
           "pose": "third"
+        }
+      ]
+    },
+    {
+      "id": "nurse",
+      "kind": "say",
+      "lang": "en",
+      "to": "patient",
+      "label": "A&E nurse",
+      "hint": "You are the A&E nurse. Nurse Chiu delivers. You do not conduct the birth.",
+      "opts": [
+        {
+          "t": "Nurse this birth",
+          "perform": "nurse",
+          "performHint": "You are the A&E nurse. Nurse Chiu, the midwife, delivers. You do not conduct the birth.",
+          "mark": [
+            "Recognises imminent birth from what she can see and what the mother says",
+            "Takes the rapid history",
+            "Prepares the room, the trolley, and the mother",
+            "Notes the time, the cord, the liquor, shows the baby, and clamps at least 2.5 cm from the umbilicus",
+            "Excludes a second twin, then gives syntometrine 1 ml IM, and labels both cord-blood bottles",
+            "Calls separation, checks two arteries and one vein, bags the placenta, and checks the mother",
+            "Hands over a stable mother and baby with specimens, papers, and an escort"
+          ]
         }
       ]
     }

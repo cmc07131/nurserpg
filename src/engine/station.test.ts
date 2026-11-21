@@ -695,18 +695,46 @@ test('the three roles share the delivery marks and change only the room job', ()
   const doctor = applyRole(pack, 'doctor')
   const midwife = applyRole(pack, 'midwife')
   const nurse = applyRole(pack, 'nurse')
-  const marks = (row: typeof pack) => row.actions.flatMap((a) => (a.options ?? []).flatMap((o) => o.marksChecklistIds ?? [])).join('|')
-  assert.equal(marks(doctor), marks(pack))
-  assert.equal(marks(midwife), marks(pack))
-  assert.equal(marks(nurse), marks(pack))
+  const labels = (row: typeof pack) => {
+    const name = new Map(row.marks.map((m) => [m.id, m.label]))
+    return row.actions.flatMap((a) => (a.options ?? []).flatMap((o) => (o.marksChecklistIds ?? []).map((id) => name.get(id) ?? id)))
+  }
+  const seven = [
+    'Recognises imminent birth from what she can see and what the mother says',
+    'Takes the rapid history',
+    'Prepares the room, the trolley, and the mother',
+    'Notes the time, the cord, the liquor, shows the baby, and clamps at least 2.5 cm from the umbilicus',
+    'Excludes a second twin, then gives syntometrine 1 ml IM, and labels both cord-blood bottles',
+    'Calls separation, checks two arteries and one vein, bags the placenta, and checks the mother',
+    'Hands over a stable mother and baby with specimens, papers, and an escort',
+  ]
+  const delivery = labels(pack).filter((label) => !seven.includes(label))
+  assert.deepEqual(labels(doctor), delivery)
+  assert.deepEqual(labels(midwife), delivery)
+  assert.deepEqual(labels(nurse), seven)
+  assert.ok(doctor.actions.some((a) => a.id === 'prep'))
+  assert.ok(midwife.actions.some((a) => a.id === 'prep'))
+  assert.ok(doctor.actions.some((a) => a.id === 'birth'))
+  assert.ok(midwife.actions.some((a) => a.id === 'third'))
+  assert.equal(doctor.actions.some((a) => a.id === 'nurse'), false)
+  assert.deepEqual(nurse.actions.map((a) => a.id), ['nurse'])
+  assert.equal(nurse.actions[0]?.options?.[0]?.perform, 'nurse')
+  assert.deepEqual(nurse.phases?.map((p) => p.steps), [['nurse']])
+  assert.equal(doctor.phases?.some((p) => p.steps.includes('nurse')), false)
+  assert.equal(midwife.phases?.some((p) => p.steps.includes('nurse')), false)
   const prep = (row: typeof pack) => row.actions.find((a) => a.id === 'prep')!.options!.map((o) => o.label)
-  assert.notDeepEqual(prep(doctor), prep(nurse))
-  assert.match(prep(nurse)[0], /Nurse Chiu/)
-  assert.match(prep(nurse)[1], /for the midwife/)
-  assert.match(prep(nurse)[3], /label it/)
+  assert.notDeepEqual(prep(doctor), prep(midwife))
+  assert.match(prep(doctor)[0], /Nurse Chiu/)
+  assert.match(prep(midwife)[0], /Nurse Wong/)
   assert.equal(midwife.cast.find((c) => c.id === 'midwife')?.displayName, 'Nurse Wong')
+  assert.equal(nurse.cast.find((c) => c.id === 'midwife')?.displayName, 'Nurse Chiu')
   assert.match(nurse.meta.stem, /AED nurse/)
+  assert.match(nurse.meta.stem, /do not conduct the birth/)
+  assert.match(nurse.meta.stem, /Mrs Lai/)
+  assert.equal(nurse.title, 'AED nurse · Imminent birth')
   assert.match(doctor.meta.stem, /You are the doctor/)
   assert.equal(pack.title, 'Normal delivery')
+  assert.equal(pack.actions.some((a) => a.id === 'nurse'), true)
+  assert.equal(pack.actions.some((a) => a.id === 'prep'), true)
   assert.doesNotMatch(pack.meta.stem, /15 minutes/)
 })
