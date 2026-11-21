@@ -96,17 +96,19 @@ export function NurseProcedure({ job, coach, onDone }: { job: PerformJob; coach:
                 run={r}
                 onFlag={(key) => act(key, key === 'time' ? 'Time called.' : key === 'cord' ? 'No cord on the neck.' : key === 'liquor' ? 'Liquor is clear.' : key === 'shown' ? 'She says: a girl.' : 'No birthmark.')}
               />
-              <ClampPicture
-                run={r}
-                onPick={(cm) => {
-                  const patch = chooseClamp(api.runRef.current, cm)
-                  const placed = patch?.clampCm
-                  if (placed == null) return
-                  api.upd({ clampCm: placed })
-                  sfx.select()
-                  api.feel(placed >= MIN_CLAMP_CM ? `Clamp at ${placed.toFixed(1)} cm.` : `${placed.toFixed(1)} cm is too close. Redo, and tap further out.`)
-                }}
-              />
+              {r.time && r.cord && r.liquor && r.shown && r.birthmark && (
+                <ClampPicture
+                  run={r}
+                  onPick={(cm) => {
+                    const patch = chooseClamp(api.runRef.current, cm)
+                    const placed = patch?.clampCm
+                    if (placed == null) return
+                    api.upd({ clampCm: placed })
+                    sfx.select()
+                    api.feel(placed >= MIN_CLAMP_CM ? `Clamp at ${placed.toFixed(1)} cm. Second clamp further along, then cut between them.` : `${placed.toFixed(1)} cm is too close. Redo, and tap further out.`)
+                  }}
+                />
+              )}
             </>
           )}
           {duty?.key === 'drug' && (

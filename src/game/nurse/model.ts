@@ -205,27 +205,27 @@ export const DUTIES: readonly Duty[] = [
     label: 'Imminent signs',
     range: 'Crowning, vulval gapping with a bulging perineum, anus pouting, and an involuntary urge to push',
     why: 'Those are the signs you can see or hear. Full dilatation is not your examination, and you do not conduct the birth.',
-    lede: 'Tap what you see, and what she says.',
+    lede: 'From the foot of the bed. The head is crowning.',
     goals: [
       {
         label: 'Crowning',
         ok: (r) => r.crowning,
-        how: () => 'Tap CROWNING. The head stays at the vulva and does not slip back. That is a sign you can see.',
+        how: () => 'Tap the head at the vulva. It stays and does not slip back. That is crowning, and you can see it.',
       },
       {
         label: 'Vulva gaping, perineum bulging',
         ok: (r) => r.perineum,
-        how: () => 'Tap VULVA GAPING, PERINEUM BULGING. The vulva opens and the perineum bulges as the head comes down.',
+        how: () => 'Tap the bulging perineum. The vulva is open around the head.',
       },
       {
         label: 'Anus pouting',
         ok: (r) => r.anus,
-        how: () => 'Tap ANUS POUTING. A pouting anus, with the other signs, means the birth is imminent.',
+        how: () => 'Tap the pouting anus. With the other signs, the birth is imminent.',
       },
       {
         label: 'She says she has to push',
         ok: (r) => r.push,
-        how: () => 'Tap what she says: “I HAVE TO PUSH.” An involuntary urge to push is a sign you hear, not a cervix you examine.',
+        how: () => 'Tap what she says. An involuntary urge to push is a sign you hear. You do not examine the cervix.',
       },
     ],
     value: (r) => said([
@@ -241,27 +241,27 @@ export const DUTIES: readonly Duty[] = [
     label: 'Rapid history',
     range: 'Waters clear, no allergies or medicines, one baby, no previous caesarean or bleed, 39 weeks',
     why: 'The short history is normal, so you prepare for a normal birth in A&E.',
-    lede: 'Ask her. She answers.',
+    lede: 'Ask from the bedside. She answers.',
     goals: [
       {
         label: 'The waters',
         ok: (r) => r.liquorAsk,
-        how: () => 'Ask about the waters. She says they are clear.',
+        how: () => 'Tap the fluid on the sheet and ask. She says the waters are clear.',
       },
       {
         label: 'Allergies and medicines',
         ok: (r) => r.allergy,
-        how: () => 'Ask about allergies and medicines. She has none.',
+        how: () => 'Tap her arm and ask. No allergies and no medicines.',
       },
       {
         label: 'This pregnancy',
         ok: (r) => r.obstetric,
-        how: () => 'Ask about this pregnancy: how many babies, any previous caesarean, any bleed. One baby, no caesarean, no bleed.',
+        how: () => 'Tap her abdomen and ask. One baby, no caesarean, no bleed.',
       },
       {
         label: 'How many weeks',
         ok: (r) => r.weeks,
-        how: () => 'Ask how many weeks. She is 39 weeks, in her second pregnancy.',
+        how: () => 'Tap her and ask how many weeks. She is 39 weeks, in her second pregnancy.',
       },
     ],
     value: (r) => said([
@@ -277,12 +277,12 @@ export const DUTIES: readonly Duty[] = [
     label: 'Room, trolley, mother',
     range: 'PPE, sterile delivery set, chlorhexidine and a maternity pad, syntometrine 1 ml on the trolley (not given), both bottles, the BBA/BOA form, an explanation, and verbal consent. No ATT injection',
     why: 'Nurse Chiu can deliver only if the trolley and Mrs Lai are ready. Syntometrine waits until a second twin is excluded.',
-    lede: 'Dress, stock the trolley, and talk to her.',
+    lede: 'Dress, open the set, and ready her.',
     goals: [
       {
         label: 'PPE on',
         ok: (r) => r.ppe,
-        how: () => 'Put on a gown, eye protection, and sterile gloves. You are beside the birth.',
+        how: () => 'Wash, then put on a waterproof gown, eye protection, and sterile gloves.',
       },
       {
         label: 'Sterile delivery set',
@@ -292,7 +292,7 @@ export const DUTIES: readonly Duty[] = [
       {
         label: 'Chlorhexidine and a maternity pad',
         ok: (r) => r.pad,
-        how: () => 'Put chlorhexidine and a maternity pad on the trolley.',
+        how: () => 'Put chlorhexidine 0.05% out, and lay a maternity pad against the anus.',
       },
       {
         label: 'Syntometrine 1 ml on the trolley, not given',
@@ -337,32 +337,32 @@ export const DUTIES: readonly Duty[] = [
     label: 'At the birth',
     range: 'Time called, no cord around the neck, clear liquor, baby shown and the sex stated, no birthmark, clamp at least 2.5 cm from the umbilicus',
     why: 'You record what you see. The clamp leaves a stump. Nurse Chiu conducts the birth.',
-    lede: 'Nurse Chiu delivers. You watch, show the baby, and clamp the cord.',
+    lede: 'Nurse Chiu delivers. You call it, show the baby, and clamp.',
     goals: [
       {
         label: 'Time of birth called',
         ok: (r) => r.time,
-        how: () => 'Call the time of birth so it can be written down.',
+        how: () => 'Tap the clock and call the time of birth.',
       },
       {
         label: 'No cord around the neck',
         ok: (r) => r.cord,
-        how: () => 'Look and say so: there is no cord around the neck.',
+        how: () => 'Look at the neck and say so. There is no cord around it.',
       },
       {
         label: 'Liquor clear',
         ok: (r) => r.liquor,
-        how: () => 'Note the liquor. It is clear.',
+        how: () => 'Look at the liquor on the pad. It is clear.',
       },
       {
         label: 'Baby shown, sex stated',
         ok: (r) => r.shown,
-        how: () => 'Show her the baby and let her state the sex. She says a girl.',
+        how: () => 'Turn the baby so she can see. She says a girl.',
       },
       {
         label: 'No birthmark',
         ok: (r) => r.birthmark,
-        how: () => 'Look the baby over with her and report it: no birthmark.',
+        how: () => 'Look over her skin with the mother. There is no birthmark.',
       },
       {
         label: 'Clamp at least 2.5 cm from the umbilicus',
@@ -372,7 +372,7 @@ export const DUTIES: readonly Duty[] = [
         how: (r) =>
           r.clampCm !== null && r.clampCm < MIN_CLAMP_CM
             ? `That clamp is ${r.clampCm.toFixed(1)} cm from the umbilicus, closer than 2.5 cm. REDO THIS STEP and tap further along the cord.`
-            : 'Tap the cord on the 2.5 cm line or further from the umbilicus, away from the baby.',
+            : 'Tap the cord at 2.5 cm or further from the umbilicus. That clamp is on the baby’s side. A second clamp goes further along, and the cord is cut between them.',
       },
     ],
     value: (r) =>
@@ -393,12 +393,12 @@ export const DUTIES: readonly Duty[] = [
     label: 'Twin, then syntometrine',
     range: 'Palpate and exclude a second twin, then syntometrine 1 ml IM, record the time, and label both bottles',
     why: 'Syntometrine before you have felt for a second twin can trap that baby. Both bottles need her name.',
-    lede: 'Feel the abdomen, then give the injection.',
+    lede: 'Feel for a second twin, then inject the thigh.',
     goals: [
       {
         label: 'Palpated: no second twin',
         ok: (r) => r.palpated,
-        how: () => 'Palpate the abdomen before any syntometrine. One baby, the size of a single pregnancy. No second twin.',
+        how: () => 'Feel the abdomen with both hands before any syntometrine. One baby. No second twin.',
       },
       {
         label: 'Syntometrine 1 ml IM after that',
@@ -407,12 +407,12 @@ export const DUTIES: readonly Duty[] = [
         how: (r) =>
           r.drugEarly
             ? 'You gave syntometrine before feeling for a second twin. It can trap a baby still inside. REDO THIS STEP. Palpate first, then give syntometrine 1 ml IM.'
-            : 'After the palpation, give syntometrine 1 ml intramuscular. Not before.',
+            : 'After you have felt the abdomen, inject syntometrine 1 ml into the thigh. Not before.',
       },
       {
         label: 'Injection time recorded',
         ok: (r) => r.drugTime,
-        how: () => 'Record the time you gave the syntometrine.',
+        how: () => 'Write the time of the syntometrine 1 ml injection.',
       },
       {
         label: 'EDTA bottle labelled',
@@ -440,13 +440,13 @@ export const DUTIES: readonly Duty[] = [
     label: 'Placenta and mother',
     range: 'At least two separation signs, two arteries and one vein, placenta in a labelled bag, maternity pad, warm and dry, blood loss estimated, pulse rechecked',
     why: 'You do not pull on the cord. Primary postpartum haemorrhage is more than 500 ml. This birth is not a haemorrhage.',
-    lede: 'Watch the placenta. Do not pull the cord.',
+    lede: 'Watch. It separates on its own. Do not pull.',
     goals: [
       {
         label: 'At least two separation signs',
         ok: (r) => separationCount(r) >= 2,
         now: (r) => `${separationCount(r)} seen`,
-        how: () => 'Tap at least two: a gush of blood, the cord lengthening, and the fundus firm, globular and risen. You do not pull on the cord.',
+        how: () => 'Watch for at least two: a gush, the cord lengthening by itself, and the fundus firm, globular and risen. You do not pull.',
       },
       {
         label: 'Two arteries and one vein',
@@ -498,32 +498,32 @@ export const DUTIES: readonly Duty[] = [
     label: 'Handover',
     range: 'Both stable, labour ward called, labelled bottles and sealed placenta, A&E charts and BBA/BOA, escort with the transfer bag and a phone',
     why: 'The ward needs the mother, the baby, the specimens, and the papers, with a nurse who can call on the way.',
-    lede: 'Send them out with what the ward needs.',
+    lede: 'Phone the ward, pack the tray, and walk with them.',
     goals: [
       {
         label: 'Mother and baby stable',
         ok: (r) => r.stable,
-        how: () => 'Confirm both are stable before you move them.',
+        how: () => 'Look at mother and baby. Both are stable.',
       },
       {
         label: 'Labour ward called',
         ok: (r) => r.ward,
-        how: () => 'Call the labour ward so they are ready.',
+        how: () => 'Phone the labour ward so they are ready.',
       },
       {
         label: 'Bottles and placenta go with her',
         ok: (r) => r.specimens,
-        how: () => 'The labelled bottles and the sealed placenta go with her.',
+        how: () => 'Put the labelled bottles and the sealed placenta on the tray that goes with her.',
       },
       {
         label: 'A&E charts and BBA/BOA',
         ok: (r) => r.papers,
-        how: () => 'Send the A&E charts and the BBA/BOA form.',
+        how: () => 'Take the A&E charts and the BBA/BOA form.',
       },
       {
         label: 'Escort with the transfer bag and a phone',
         ok: (r) => r.escort,
-        how: () => 'An escort goes with them, carrying the transfer bag and a phone.',
+        how: () => 'Walk with them. Carry the transfer bag and a phone.',
       },
     ],
     value: (r) => said([
