@@ -205,7 +205,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Imminent signs',
     range: 'Crowning, vulval gapping with a bulging perineum, anus pouting, and an involuntary urge to push',
     why: 'Those are the signs you can see or hear. Full dilatation is not your examination, and you do not conduct the birth.',
-    lede: 'You are the A&E nurse. You do not conduct the birth, and you do not assess the cervix. Name what you can see, and what she says.',
+    lede: 'Tap what you see, and what she says.',
     goals: [
       {
         label: 'Crowning',
@@ -241,7 +241,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Rapid history',
     range: 'Waters clear, no allergies or medicines, one baby, no previous caesarean or bleed, 39 weeks',
     why: 'The short history is normal, so you prepare for a normal birth in A&E.',
-    lede: 'Ask Mrs Lai four things. She answers. This is a rapid history, not a full booking.',
+    lede: 'Ask her. She answers.',
     goals: [
       {
         label: 'The waters',
@@ -277,7 +277,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Room, trolley, mother',
     range: 'PPE, sterile delivery set, chlorhexidine and a maternity pad, syntometrine 1 ml on the trolley (not given), both bottles, the BBA/BOA form, an explanation, and verbal consent. No ATT injection',
     why: 'Nurse Chiu can deliver only if the trolley and Mrs Lai are ready. Syntometrine waits until a second twin is excluded.',
-    lede: 'Prepare the room, the trolley, and Mrs Lai. Leave syntometrine on the trolley. There is no ATT injection.',
+    lede: 'Dress, stock the trolley, and talk to her.',
     goals: [
       {
         label: 'PPE on',
@@ -337,7 +337,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'At the birth',
     range: 'Time called, no cord around the neck, clear liquor, baby shown and the sex stated, no birthmark, clamp at least 2.5 cm from the umbilicus',
     why: 'You record what you see. The clamp leaves a stump. Nurse Chiu conducts the birth.',
-    lede: 'Nurse Chiu delivers. Call the time, look at the cord and the liquor, show her the baby, and clamp at least 2.5 cm from the umbilicus.',
+    lede: 'Nurse Chiu delivers. You watch, show the baby, and clamp the cord.',
     goals: [
       {
         label: 'Time of birth called',
@@ -393,7 +393,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Twin, then syntometrine',
     range: 'Palpate and exclude a second twin, then syntometrine 1 ml IM, record the time, and label both bottles',
     why: 'Syntometrine before you have felt for a second twin can trap that baby. Both bottles need her name.',
-    lede: 'Feel for a second twin before the drug. Then syntometrine 1 ml intramuscular, the time, and both labels.',
+    lede: 'Feel the abdomen, then give the injection.',
     goals: [
       {
         label: 'Palpated: no second twin',
@@ -440,7 +440,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Placenta and mother',
     range: 'At least two separation signs, two arteries and one vein, placenta in a labelled bag, maternity pad, warm and dry, blood loss estimated, pulse rechecked',
     why: 'You do not pull on the cord. Primary postpartum haemorrhage is more than 500 ml. This birth is not a haemorrhage.',
-    lede: 'You do not pull on the cord. Call at least two signs that the placenta has separated, then check the cord and Mrs Lai.',
+    lede: 'Watch the placenta. Do not pull the cord.',
     goals: [
       {
         label: 'At least two separation signs',
@@ -498,7 +498,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Handover',
     range: 'Both stable, labour ward called, labelled bottles and sealed placenta, A&E charts and BBA/BOA, escort with the transfer bag and a phone',
     why: 'The ward needs the mother, the baby, the specimens, and the papers, with a nurse who can call on the way.',
-    lede: 'Hand over a stable mother and baby. Specimens, papers, and an escort go with them.',
+    lede: 'Send them out with what the ward needs.',
     goals: [
       {
         label: 'Mother and baby stable',
