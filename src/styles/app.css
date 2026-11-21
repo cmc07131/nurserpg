@@ -1810,6 +1810,69 @@ button {
   background: #dfe8f0;
 }
 
+/* Nurse pictures. The drawing stays clear. The words sit under it, where they can be read. */
+.nurse-shot {
+  max-width: 360px;
+  margin: 0 auto 8px;
+}
+
+.nurse-shot .io-figure {
+  margin-bottom: 0;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #fff6ea;
+}
+
+.nurse-caption {
+  border: 3px solid var(--ink);
+  border-radius: 0 0 6px 6px;
+  background: #fff7ed;
+  padding: 8px 8px 7px;
+}
+
+.nurse-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nurse-legend li {
+  margin: 0;
+  padding: 5px 6px 4px;
+  border: 2px solid #1c1917;
+  border-radius: 4px;
+  background: #fff;
+  color: #1c1917;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.nurse-legend li[data-on] {
+  background: #e7f6e4;
+  border-color: #1d6b45;
+  color: #1d6b45;
+}
+
+.nurse-say {
+  margin: 0;
+  color: #1c1917;
+  font-family: var(--font-body);
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.nurse-legend + .nurse-say {
+  margin-top: 6px;
+}
+
+.nurse-say[data-bad] {
+  color: #9a1020;
+}
+
 .io-leg-big {
   aspect-ratio: 2 / 3;
   width: min(100%, 300px);
