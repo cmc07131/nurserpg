@@ -1,8 +1,8 @@
 # Nurse RPG
 
-A fork of the OSCE gym for one uncomplicated birth. The player picks a role (doctor, midwife, or AED nurse) and walks the same delivery and third stage. The AED nurse's preparation is nursing management of the room. Do not put the other stations back. Do not add complications, traps, or a viva.
+A fork of the OSCE gym for one uncomplicated birth. The player picks a role. Doctor and midwife conduct the delivery and the third stage. The AED nurse learns and does her own job on a separate bench. Do not put the other stations back. Do not add complications, traps, or a viva.
 
-The birth and third-stage benches stay as they are (`src/game/delivery/`). Role wording is `src/game/delivery/roles.ts`, applied from `?role=` on the play route. The jazz bed is original and lives in `src/game/sfx.ts`.
+The birth benches stay for the doctor and the midwife (`src/game/delivery/`). The nurse bench is `src/game/nurse/`. Role wording is `src/game/delivery/roles.ts`, applied from `?role=` on the play route. The jazz bed is original and lives in `src/game/sfx.ts`.
 
 ## Commands
 

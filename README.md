@@ -1,14 +1,14 @@
 # Nurse RPG
 
-A short role-play of one uncomplicated birth. You choose who you are, then walk the normal steps until the order is familiar.
+A short role-play of one uncomplicated birth. You choose who you are. Doctor and midwife conduct the birth. The AED nurse does her own job beside that birth.
 
 ## Roles
 
 - **Doctor.** You conduct the delivery. Nurse Chiu, the midwife, is with you.
 - **Midwife.** You conduct the delivery. Nurse Wong, the AED nurse, is with you.
-- **AED nurse.** You run the room: call the midwife and the neonatal nurse, set out the pack, keep the baby warm, and have oxytocin 10 IU drawn up and labelled. You then walk the same birth and third stage, so the order is yours.
+- **AED nurse.** You learn and do her job: recognise an imminent birth, ask the rapid history, prepare, assist at the birth, give syntometrine after you have felt there is no second twin, and hand over. Nurse Chiu conducts the birth. You do not.
 
-The hands-on steps are the same for every role. Preparation is worded for the job you picked. There is no complication and no quiz.
+Doctor and midwife still conduct the birth. The benches use the same controls: labelled buttons, and pictures you tap. There is no complication and no quiz.
 
 ## Run
 
