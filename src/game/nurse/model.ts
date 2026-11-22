@@ -205,7 +205,7 @@ export const DUTIES: readonly Duty[] = [
     label: 'Imminent signs',
     range: 'Crowning, vulval gapping with a bulging perineum, anus pouting, and an involuntary urge to push',
     why: 'Those are the signs you can see or hear. Full dilatation is not your examination, and you do not conduct the birth.',
-    lede: 'From the foot of the bed. The head is crowning.',
+    lede: 'You are an AED nurse assessing a pregnant woman at triage. She says, ‘I have to push!’ Her perineum is exposed for assessment. Look closely at the picture. What sign suggests that birth is imminent?',
     goals: [
       {
         label: 'Crowning',

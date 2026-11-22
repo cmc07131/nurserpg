@@ -14,6 +14,7 @@ import {
   type Flag,
   type NurseRun,
 } from './model'
+import { ROLES } from '../delivery/roles'
 import { NURSE_TITLES, nurseGoals } from './steps'
 
 const ON_LINE = CLAMP_PICTURE.umbilicusX + 2.5 * CLAMP_PICTURE.pxPerCm
@@ -129,6 +130,18 @@ test('a clamp under 2.5 cm fails the birth row', () => {
   const edge = { ...finished(), clampCm: null }
   const onLine = chooseClamp(edge, cmAt(CLAMP_PICTURE.umbilicusX + 2.5 * CLAMP_PICTURE.pxPerCm, CLAMP_PICTURE.cordY) ?? -1)
   assert.equal(checkNurse({ ...edge, ...onLine }).find((item) => item.key === 'birth')?.ok, true)
+})
+
+test('the look opening does not name the sign', () => {
+  const look = DUTIES.find((duty) => duty.key === 'look')
+  assert.equal(
+    look?.lede,
+    'You are an AED nurse assessing a pregnant woman at triage. She says, ‘I have to push!’ Her perineum is exposed for assessment. Look closely at the picture. What sign suggests that birth is imminent?',
+  )
+  assert.equal(/crown/i.test(look?.lede ?? ''), false)
+  assert.equal(/crown/i.test(ROLES.nurse.stem), false)
+  assert.equal(/crowning/.test(ROLES.doctor.stem), true)
+  assert.equal(/crowning/.test(ROLES.midwife.stem), true)
 })
 
 test('a run with one separation sign fails the mother row', () => {

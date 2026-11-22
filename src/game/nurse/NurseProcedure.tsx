@@ -49,7 +49,7 @@ export function NurseProcedure({ job, coach, onDone }: { job: PerformJob; coach:
     api.feel(text)
   }
   return (
-    <div className="io-bench flex min-h-0 flex-1 flex-col select-none" data-testid="nurse-bench">
+    <div className="io-bench nurse-bench flex min-h-0 flex-1 flex-col select-none" data-testid="nurse-bench">
       <div ref={body} className="min-h-0 flex-1 overflow-auto px-3 pb-3" style={{ scrollbarGutter: 'stable' }}>
         <StepFrame
           prefix="nurse"

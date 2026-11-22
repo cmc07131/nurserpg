@@ -50,7 +50,7 @@ export const ROLES: Record<RoleId, RoleBrief> = {
     short: 'AED nurse',
     blurb: 'You nurse the A&E birth',
     partner: 'Nurse Chiu',
-    stem: 'A&E. Mrs Lai, 28, is at 39 weeks in her second pregnancy. The pregnancy has been normal. The head is crowning. There are no complications.\n\nYou are the AED nurse. Nurse Chiu, the midwife, conducts the birth. You do not conduct the birth, and you do not assess the cervix.',
+    stem: 'A&E. Mrs Lai, 28, is at 39 weeks in her second pregnancy. The pregnancy has been normal. There are no complications.\n\nYou are the AED nurse. Nurse Chiu, the midwife, conducts the birth. You do not conduct the birth, and you do not assess the cervix.',
     prepHint: 'Nursing management: call both nurses, set out the pack, warmth, oxytocin drawn up and labelled.',
     prep: [
       'Call Nurse Chiu and the neonatal nurse: one for Mrs Lai, one for the baby',

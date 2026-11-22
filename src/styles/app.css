@@ -1873,6 +1873,20 @@ button {
   color: #9a1020;
 }
 
+.nurse-bench .io-lede {
+  max-width: 36rem;
+  font-family: var(--font-body);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+@media (max-width: 420px) {
+  .nurse-bench .io-lede,
+  .nurse-bench .nurse-say {
+    font-size: 18px;
+  }
+}
+
 .io-leg-big {
   aspect-ratio: 2 / 3;
   width: min(100%, 300px);
