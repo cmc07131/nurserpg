@@ -93,12 +93,23 @@ function css() {
   return `${faces}${s}\n/* utilities stood in for Tailwind */\n${utilitiesFor(path.join(root, 'src'))}\nbody{margin:0;background:#202020}\n`
 }
 
+/**
+ * How to run esbuild. `node_modules/.bin/esbuild` is the portable shim (the same one `doctor` uses).
+ * `node_modules/esbuild/bin/esbuild` is a native ELF on this machine, so it must not be passed to node.
+ */
+function esbuildInvocation(rootDir = root) {
+  const name = process.platform === 'win32' ? 'esbuild.cmd' : 'esbuild'
+  const shim = path.join(rootDir, 'node_modules', '.bin', name)
+  const command = existsSync(shim) ? shim : path.join(rootDir, 'node_modules', 'esbuild', 'bin', 'esbuild')
+  return { command, shell: process.platform === 'win32' }
+}
+
 function build() {
   mkdirSync(out, { recursive: true })
   const entry = path.join(root, '.verify/entry.tsx')
   writeFileSync(entry, ENTRY)
-  const esbuild = path.join(root, 'node_modules/esbuild/bin/esbuild')
-  const r = spawnSync(process.execPath, [esbuild, entry, '--bundle', `--outfile=${path.join(out, 'bundle.js')}`, '--jsx=automatic', '--loader:.woff2=file', '--loader:.woff=file', (process.env.VERIFY_DEV ? '--define:import.meta.env.DEV=true' : '--define:import.meta.env.DEV=false'), '--define:process.env.NODE_ENV="production"', `--alias:~=${path.join(root, 'src')}`, '--log-level=warning'], { stdio: 'inherit' })
+  const tool = esbuildInvocation()
+  const r = spawnSync(tool.command, [entry, '--bundle', `--outfile=${path.join(out, 'bundle.js')}`, '--jsx=automatic', '--loader:.woff2=file', '--loader:.woff=file', (process.env.VERIFY_DEV ? '--define:import.meta.env.DEV=true' : '--define:import.meta.env.DEV=false'), '--define:process.env.NODE_ENV="production"', `--alias:~=${path.join(root, 'src')}`, '--log-level=warning'], { stdio: 'inherit', shell: tool.shell })
   if (r.status !== 0) {
     console.error('BUILD FAILED')
     process.exit(1)
@@ -129,9 +140,10 @@ function serve(port) {
 }
 
 function doctor() {
+  const esbuild = esbuildInvocation()
   const checks = [
     ['node_modules installed', existsSync(path.join(root, 'node_modules/react'))],
-    ['esbuild runs on this platform', spawnSync(path.join(root, 'node_modules/.bin', process.platform === 'win32' ? 'esbuild.cmd' : 'esbuild'), ['--version'], { shell: process.platform === 'win32' }).status === 0],
+    ['esbuild runs on this platform', spawnSync(esbuild.command, ['--version'], { shell: esbuild.shell }).status === 0],
     ['playwright resolvable', (() => { try { require.resolve('playwright'); return true } catch { try { createRequire(import.meta.url).resolve('playwright'); return true } catch { return false } } })()],
   ]
   for (const [name, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}`)
